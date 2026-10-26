@@ -94,32 +94,40 @@ public class EnemyMovement : MonoBehaviour
     }
 
     [ContextMenu("Debug/Start Or Resume Movement")]
-    public void StartMovement()
+public void StartMovement()
+{
+    if (!Application.isPlaying || !isActiveAndEnabled)
     {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
-
-        if (!initialized)
-        {
-            Debug.LogWarning(
-                $"{name}: Initialize the enemy before starting movement.",
-                this
-            );
-            return;
-        }
-
-        if (reachedEnd)
-        {
-            return;
-        }
-
-        previousPosition = transform.position;
-        moving = true;
-
-        splineAnimate.Play();
+        return;
     }
+
+    // Quái chết hoặc đã thoát thì không được chạy tiếp.
+    Enemy enemy = GetComponent<Enemy>();
+
+    if (enemy != null && !enemy.IsAlive)
+    {
+        return;
+    }
+
+    if (!initialized)
+    {
+        Debug.LogWarning(
+            $"{name}: Initialize the enemy before starting movement.",
+            this
+        );
+        return;
+    }
+
+    if (reachedEnd)
+    {
+        return;
+    }
+
+    previousPosition = transform.position;
+    moving = true;
+
+    splineAnimate.Play();
+}
 
     [ContextMenu("Debug/Stop Movement")]
     public void StopMovement()

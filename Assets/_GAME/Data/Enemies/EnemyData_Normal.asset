@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f14080d4166098442ae1f2c50b5626e3, type: 3}
+  m_Name: EnemyData_Normal
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  enemyId: normal
+  prefab: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+  maxHP: 60
+  speed: 1.2
+  armor: 0
+  bounty: 8
+  leakDamage: 1
