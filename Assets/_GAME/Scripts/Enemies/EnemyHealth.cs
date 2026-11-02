@@ -102,7 +102,7 @@ public class EnemyHealth : MonoBehaviour
             return;
         }
 
-        TakeDamage(16);
+        GetComponent<Enemy>().RequestHit(16);
     }
 
     [ContextMenu("Debug/Set HP To 30")]

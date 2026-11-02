@@ -25,6 +25,48 @@ public class Enemy : MonoBehaviour
     public EnemyState State => state;
     public bool IsAlive => state == EnemyState.Alive;
 
+    private CombatResolver combatResolver;
+
+public EnemyIdentity Identity { get; private set; }
+
+public void BindCombat(CombatResolver resolver, EnemyIdentity identity)
+{
+    combatResolver = resolver;
+    Identity = identity;
+}
+
+public void RequestHit(int rawDamage)
+{
+    if (!IsAlive || rawDamage <= 0)
+        return;
+
+    if (combatResolver == null)
+    {
+        Debug.LogWarning($"{name}: Chưa đăng ký với CombatResolver.", this);
+        return;
+    }
+
+    combatResolver.RequestHit(new HitRequest(this, Identity, rawDamage));
+}
+
+internal void ApplyResolvedHit(int rawDamage)
+{
+    if (IsAlive && health != null)
+        health.TakeDamage(rawDamage);
+}
+
+internal void ApplyResolvedEscape()
+{
+    if (!IsAlive)
+        return;
+
+    state = EnemyState.Escaped;
+    movement?.StopMovement();
+
+    Debug.Log($"{name}: Đã tới đích, chuyển sang Escaped.", this);
+    gameObject.SetActive(false);
+}
+
     private void Awake()
     {
         state = EnemyState.Alive;
@@ -75,22 +117,16 @@ public class Enemy : MonoBehaviour
     }
 
     private void HandleReachedEnd(EnemyMovement source)
+{
+    if (!IsAlive || source != movement)
+        return;
+
+    if (combatResolver == null)
     {
-        if (!IsAlive)
-            return;
-
-        state = EnemyState.Escaped;
-
-        if (movement != null)
-            movement.StopMovement();
-
-        Debug.Log(
-            $"{name}: Đã tới đích, chuyển sang Escaped.",
-            this
-        );
-
-        // Tạm ẩn quái khi đã thoát.
-        // Chưa trừ mạng căn cứ ở bước này.
-        gameObject.SetActive(false);
+        Debug.LogWarning($"{name}: Chưa đăng ký với CombatResolver.", this);
+        return;
     }
+
+    combatResolver.RequestEscape(new EscapeRequest(this, Identity));
+}
 }

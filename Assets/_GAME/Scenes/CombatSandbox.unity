@@ -246,6 +246,28 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &208296921 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3847814975324807702, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+  m_PrefabInstance: {fileID: 317432297}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52dbbfe8155065c4a803a5d3b7a789f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
+--- !u!114 &208296923 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 192608726719893135, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+  m_PrefabInstance: {fileID: 317432297}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfecaec52a97144469dfdd83270be4e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy
 --- !u!1 &252971320
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,8 +314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovementTest
   path: {fileID: 2035270964}
   enemies:
-  - {fileID: 2126001384}
-  - {fileID: 0}
+  - {fileID: 208296921}
   - {fileID: 0}
   speed: 1.2
   startInterval: 0.8
@@ -309,6 +330,10 @@ PrefabInstance:
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: b66abba399650de4ea7b64a8a9b06545, type: 2}
+    - target: {fileID: 1249628131632072130, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+      propertyPath: currentHP
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 5787587717039318583, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4.37242
@@ -352,6 +377,10 @@ PrefabInstance:
     - target: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Name
       value: Enemy_Test_A
+      objectReference: {fileID: 0}
+    - target: {fileID: 8964247528649760068, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -665,6 +694,66 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.29, y: -0.81, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &950048871
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 950048874}
+  - component: {fileID: 950048873}
+  - component: {fileID: 950048872}
+  m_Layer: 0
+  m_Name: CombatSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &950048872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950048871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2789d477ce5099b49a431e06bccd1f82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatTestRunner
+  enemies:
+  - {fileID: 208296923}
+  testTarget: {fileID: 208296923}
+--- !u!114 &950048873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950048871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fc922da8d3305e49b90af50b2b068e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatResolver
+--- !u!4 &950048874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950048871}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.0647, y: -0.9255, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1814,7 +1903,7 @@ PrefabInstance:
       objectReference: {fileID: 2035270964}
     - target: {fileID: 8964247528649760068, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8964247528649760068, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Duration
@@ -1844,3 +1933,4 @@ SceneRoots:
   - {fileID: 865860463096526703}
   - {fileID: 252971321}
   - {fileID: 317432297}
+  - {fileID: 950048874}
