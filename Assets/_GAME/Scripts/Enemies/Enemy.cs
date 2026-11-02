@@ -25,6 +25,8 @@ public class Enemy : MonoBehaviour
     public EnemyState State => state;
     public bool IsAlive => state == EnemyState.Alive;
 
+    public float Progress => movement != null ? movement.Progress : 0f; 
+
     private CombatResolver combatResolver;
 
 public EnemyIdentity Identity { get; private set; }
@@ -61,6 +63,8 @@ internal void ApplyResolvedEscape()
         return;
 
     state = EnemyState.Escaped;
+    RemoveFromRegistry();
+
     movement?.StopMovement();
 
     Debug.Log($"{name}: Đã tới đích, chuyển sang Escaped.", this);
@@ -91,6 +95,8 @@ internal void ApplyResolvedEscape()
 
     private void OnDisable()
     {
+        RemoveFromRegistry();
+
         if (health != null)
             health.Died -= HandleDeath;
 
@@ -105,6 +111,8 @@ internal void ApplyResolvedEscape()
 
         state = EnemyState.Dead;
 
+        RemoveFromRegistry();
+        
         if (movement != null)
             movement.StopMovement();
 
@@ -128,5 +136,11 @@ internal void ApplyResolvedEscape()
     }
 
     combatResolver.RequestEscape(new EscapeRequest(this, Identity));
+}
+
+private void RemoveFromRegistry()
+{
+    if (combatResolver != null && Identity.IsValid)
+        combatResolver.Registry.Remove(Identity);
 }
 }

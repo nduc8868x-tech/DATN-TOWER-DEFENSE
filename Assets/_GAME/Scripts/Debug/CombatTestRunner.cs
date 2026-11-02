@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CombatResolver))]
@@ -159,5 +160,27 @@ private void TestRemovedTarget()
 
     resolver.RequestHit(new HitRequest(testTarget, testTarget.Identity, 16));
     testTarget.gameObject.SetActive(false);
+}
+
+private readonly List<EnemyHandle> aliveBuffer = new List<EnemyHandle>();
+
+[ContextMenu("Debug/06 - Show Alive Enemies")]
+private void ShowAliveEnemies()
+{
+    if (!Application.isPlaying || resolver == null)
+        return;
+
+    resolver.Registry.CopyAliveTo(aliveBuffer);
+
+    Debug.Log($"Registry: {aliveBuffer.Count} quái còn sống.", this);
+
+    foreach (EnemyHandle handle in aliveBuffer)
+    {
+        Debug.Log(
+            $"{handle.Target.name} | ID {handle.Identity} | " +
+            $"Tiến độ {handle.Progress:P0}",
+            handle.Target
+        );
+    }
 }
 }

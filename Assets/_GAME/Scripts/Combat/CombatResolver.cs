@@ -7,6 +7,8 @@ public class CombatResolver : MonoBehaviour
     private readonly Queue<HitRequest> hits = new Queue<HitRequest>();
     private readonly Queue<EscapeRequest> escapes = new Queue<EscapeRequest>();
 
+    public EnemyRegistry Registry { get; } = new EnemyRegistry();
+
     private static int nextSessionId;
     private int sessionId;
     private int nextSpawnId;
@@ -16,6 +18,7 @@ public class CombatResolver : MonoBehaviour
     {
         sessionId = ++nextSessionId;
         nextSpawnId = 0;
+        Registry.ClearSession();
     }
 
     public void RegisterEnemy(Enemy enemy)
@@ -28,6 +31,7 @@ public class CombatResolver : MonoBehaviour
 
         var identity = new EnemyIdentity(sessionId, ++nextSpawnId);
         enemy.BindCombat(this, identity);
+        Registry.Add(enemy);
     }
 
     public void RequestHit(HitRequest request)
@@ -48,7 +52,6 @@ public class CombatResolver : MonoBehaviour
 
         lastResolvedFrame = Time.frameCount;
 
-        // Chốt số lượng của CẢ HAI hàng đợi trước khi xử lý.
         int hitCount = hits.Count;
         int escapeCount = escapes.Count;
 

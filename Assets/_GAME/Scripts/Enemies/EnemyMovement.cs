@@ -23,6 +23,11 @@ public class EnemyMovement : MonoBehaviour
     public bool IsMoving => moving;
     public bool HasReachedEnd => reachedEnd;
 
+    public float Progress =>
+    initialized && splineAnimate != null
+        ? Mathf.Clamp01(splineAnimate.NormalizedTime)
+        : 0f;
+
     public event Action<EnemyMovement> ReachedEnd;
 
     private void Awake()
