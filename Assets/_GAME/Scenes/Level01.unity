@@ -293,8 +293,6 @@ MonoBehaviour:
   path: {fileID: 2035270964}
   enemies:
   - {fileID: 317432298}
-  - {fileID: 0}
-  - {fileID: 0}
   speed: 1.2
   startInterval: 0.8
 --- !u!1001 &317432297
