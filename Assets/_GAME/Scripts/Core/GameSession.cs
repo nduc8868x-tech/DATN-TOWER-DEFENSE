@@ -20,6 +20,7 @@ public class GameSession : MonoBehaviour
 
     private readonly Queue<EnemyResolved> resolvedQueue = new Queue<EnemyResolved>();
     private readonly HashSet<int> processedSpawnIds = new HashSet<int>();
+    private GameState stateBeforePause = GameState.Preparing;
 
     public int SessionId => sessionId;
     public GameState State => state;
@@ -35,14 +36,26 @@ public class GameSession : MonoBehaviour
     public event Action<GameState> StateChanged;
     public event Action<int> LivesChanged;
     public event Action<SessionSnapshot> SnapshotChanged;
+    public event Action BatchDrained;
+
+    private void OnDestroy()
+    {
+        if (economyManager != null)
+            economyManager.GoldChanged -= HandleGoldChanged;
+
+        Time.timeScale = 1f;
+    }
 
     public void Initialize(int startingLives = 20, int startingGold = 240, int maxWaves = 10)
     {
+        Time.timeScale = 1f;
         sessionId = ++nextSessionId;
-        lives = startingLives;
+        lives = Mathf.Max(0, startingLives);
         currentWave = 1;
-        totalWaves = maxWaves;
+        totalWaves = Mathf.Max(1, maxWaves);
         aliveEnemies = 0;
+        stateBeforePause = GameState.Preparing;
+
         resolvedQueue.Clear();
         processedSpawnIds.Clear();
 
@@ -50,9 +63,14 @@ public class GameSession : MonoBehaviour
             economyManager = GetComponent<EconomyManager>();
 
         if (economyManager != null)
+        {
+            economyManager.GoldChanged -= HandleGoldChanged;
+            economyManager.GoldChanged += HandleGoldChanged;
             economyManager.Initialize(startingGold);
+        }
 
         SetState(GameState.Preparing);
+        LivesChanged?.Invoke(lives);
         NotifySnapshot();
     }
 
@@ -65,6 +83,45 @@ public class GameSession : MonoBehaviour
             return false;
 
         SetState(newState);
+        return true;
+    }
+
+    public bool Pause()
+    {
+        if (state != GameState.Preparing && state != GameState.Running)
+            return false;
+
+        stateBeforePause = state;
+        Time.timeScale = 0f;
+        SetState(GameState.Paused);
+        return true;
+    }
+
+    public bool Resume()
+    {
+        if (state != GameState.Paused)
+            return false;
+
+        Time.timeScale = 1f;
+        SetState(stateBeforePause);
+        return true;
+    }
+
+    public bool MarkVictory()
+    {
+        if (state == GameState.Victory || state == GameState.Defeat || lives <= 0)
+            return false;
+
+        SetState(GameState.Victory);
+        return true;
+    }
+
+    public bool ForceDefeat()
+    {
+        if (state == GameState.Victory || state == GameState.Defeat)
+            return false;
+
+        SetState(GameState.Defeat);
         return true;
     }
 
@@ -82,9 +139,21 @@ public class GameSession : MonoBehaviour
         NotifySnapshot();
     }
 
+    public void RegisterEnemySpawned()
+    {
+        aliveEnemies++;
+        NotifySnapshot();
+    }
+
     public void SetAliveEnemies(int count)
     {
         aliveEnemies = Mathf.Max(0, count);
+        NotifySnapshot();
+    }
+
+    public void ResetAliveCount()
+    {
+        aliveEnemies = 0;
         NotifySnapshot();
     }
 
@@ -98,6 +167,11 @@ public class GameSession : MonoBehaviour
 
     public void DrainResolvedBatch()
     {
+        if (state == GameState.Paused || state == GameState.Victory || state == GameState.Defeat)
+            return;
+
+        bool anyProcessed = false;
+
         while (resolvedQueue.Count > 0)
         {
             EnemyResolved item = resolvedQueue.Dequeue();
@@ -105,9 +179,11 @@ public class GameSession : MonoBehaviour
             if (item.SessionId != sessionId)
                 continue;
 
-            // Kiểm tra trùng lặp (Dedup)
+            // Chống nhận trùng lặp cùng SpawnId
             if (!processedSpawnIds.Add(item.SpawnId))
                 continue;
+
+            anyProcessed = true;
 
             if (item.Reason == ResolutionReason.Dead)
             {
@@ -116,26 +192,36 @@ public class GameSession : MonoBehaviour
             }
             else if (item.Reason == ResolutionReason.Escaped)
             {
-                lives = Mathf.Max(0, lives - item.LeakDamage);
+                lives = Mathf.Max(0, lives - Mathf.Max(0, item.LeakDamage));
                 LivesChanged?.Invoke(lives);
             }
 
             aliveEnemies = Mathf.Max(0, aliveEnemies - 1);
         }
 
-        NotifySnapshot();
+        if (anyProcessed)
+            NotifySnapshot();
 
-        // Xét điều kiện thua trước
-        if (lives <= 0 && state != GameState.Defeat)
+        // Xét thua trước
+        if (lives <= 0)
         {
-            SetState(GameState.Defeat);
+            if (state != GameState.Defeat && state != GameState.Victory)
+                SetState(GameState.Defeat);
+            return;
         }
+
+        BatchDrained?.Invoke();
     }
 
     public SessionSnapshot GetSnapshot()
     {
         int gold = economyManager != null ? economyManager.CurrentGold : 0;
         return new SessionSnapshot(state, gold, lives, currentWave, totalWaves, aliveEnemies);
+    }
+
+    private void HandleGoldChanged(int _)
+    {
+        NotifySnapshot();
     }
 
     private void NotifySnapshot()
