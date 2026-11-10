@@ -1591,6 +1591,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1806561606}
   - component: {fileID: 1806561605}
+  - component: {fileID: 1806561607}
   m_Layer: 0
   m_Name: TowerSession8
   m_TagString: Untagged
@@ -1634,6 +1635,24 @@ Transform:
   - {fileID: 64387905}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1806561607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1806561604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2a0785a315876469547117b98e94be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TowerAttackTest
+  towerA: {fileID: 412558832}
+  towerB: {fileID: 64387904}
+  spawnService: {fileID: 950048876}
+  resolver: {fileID: 950048873}
+  path: {fileID: 2035270964}
+  report: Not run
 --- !u!1 &1887074395
 GameObject:
   m_ObjectHideFlags: 0

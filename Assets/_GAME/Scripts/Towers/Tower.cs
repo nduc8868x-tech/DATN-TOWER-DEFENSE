@@ -19,6 +19,25 @@ public class Tower : MonoBehaviour
     private CombatResolver resolver;
     private int sessionId;
     private bool previewOnly;
+    private bool automaticTargeting;
+    private readonly TowerTargeting targeting = new TowerTargeting();
+    private int shotId;
+    public EnemyHandle CurrentTarget => targeting.Current;
+    public int ShotCount => shotId;
+    public readonly struct ShotRecord
+    {
+        public readonly int ShotId, TowerId, Frame;
+        public readonly EnemyHandle Target;
+        public readonly float GameTime;
+        public readonly Vector3 Origin;
+        public ShotRecord(Tower tower, EnemyHandle target)
+        {
+            ShotId = tower.shotId; TowerId = tower.GetInstanceID(); Frame = Time.frameCount;
+            Target = target; GameTime = Time.time; Origin = tower.muzzle.position;
+        }
+    }
+    // Projectile creation can subscribe here in session 10. No damage is applied here.
+    public event System.Action<ShotRecord> ShotFired;
     private static readonly int PreviewShot = Animator.StringToHash("PreviewShot");
 
     public TowerData Data => data;
@@ -87,6 +106,8 @@ public class Tower : MonoBehaviour
         remainingCooldown = 0f;
         previewShotCount = 0;
         previewOnly = false;
+        automaticTargeting = false;
+        targeting.Reset();
         if (stats.bodySprite != null)
             body.sprite = stats.bodySprite;
         initialized = true;
@@ -112,24 +133,44 @@ public class Tower : MonoBehaviour
         if (!TryValidateForActivation(out _, preview))
             return false;
         previewOnly = preview;
+        automaticTargeting = false;
         activeCombat = true;
         return true;
     }
 
     public void Suspend() => activeCombat = false;
 
+    public bool ActivateTargeting()
+    {
+        if (!Activate(true)) return false;
+        automaticTargeting = true;
+        targeting.Reset();
+        return true;
+    }
+
     private void OnDisable() => Suspend();
 
     private void Update()
     {
-        if (IsActive)
-            remainingCooldown = Mathf.Max(0f, remainingCooldown - Time.deltaTime);
+        if (!IsActive || Time.timeScale <= 0f || Time.deltaTime <= 0f) return;
+        remainingCooldown = Mathf.Max(0f, remainingCooldown - Time.deltaTime);
+        if (!automaticTargeting) return;
+        var target = targeting.Tick(registry, sessionId, transform.position, stats.range, Time.deltaTime);
+        if (remainingCooldown > 0f || muzzle == null ||
+            !TowerTargeting.IsValid(target, sessionId, transform.position, stats.range)) return;
+        remainingCooldown = stats.cooldown;
+        shotId++;
+        var shot = new ShotRecord(this, target);
+        if (animator != null) animator.SetTrigger(PreviewShot);
+        Debug.DrawLine(muzzle.position, target.Position, Color.yellow, 0.15f);
+        Debug.Log($"SHOT {shot.ShotId} | tower {shot.TowerId} | target {target.Identity} | gameTime {shot.GameTime:F4}", this);
+        ShotFired?.Invoke(shot);
     }
 
     // Called only by the debug caller. Targeting and real projectile spawning are later sessions.
     public bool TryPreviewShot()
     {
-        if (!IsActive || !previewOnly || remainingCooldown > 0f)
+        if (!IsActive || !previewOnly || automaticTargeting || Time.timeScale <= 0f || remainingCooldown > 0f)
             return false;
         remainingCooldown = stats.cooldown;
         previewShotCount++;
