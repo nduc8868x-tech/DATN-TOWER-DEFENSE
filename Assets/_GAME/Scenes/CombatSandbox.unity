@@ -378,6 +378,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy_Test_A
       objectReference: {fileID: 0}
+    - target: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8964247528649760068, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Target
       value: 
@@ -454,6 +458,10 @@ PrefabInstance:
     - target: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Name
       value: Enemy_Test_B
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8964247528649760068, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Target
@@ -806,6 +814,8 @@ GameObject:
   - component: {fileID: 950048874}
   - component: {fileID: 950048873}
   - component: {fileID: 950048872}
+  - component: {fileID: 950048876}
+  - component: {fileID: 950048875}
   m_Layer: 0
   m_Name: CombatSystem
   m_TagString: Untagged
@@ -820,7 +830,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 950048871}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2789d477ce5099b49a431e06bccd1f82, type: 3}
   m_Name: 
@@ -857,6 +867,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &950048875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950048871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3da1ede836bed514884742d88d5d0eaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnTest
+  resolver: {fileID: 950048873}
+  spawnService: {fileID: 950048876}
+  path: {fileID: 2035270964}
+  enemyId: normal
+  enemyCount: 5
+  spawnInterval: 0.8
+--- !u!114 &950048876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950048871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180491647f506ba4086db69e3389ae6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnService
+  catalog: {fileID: 11400000, guid: 94f24687133787144b76ca1be2b21d37, type: 2}
+  resolver: {fileID: 950048873}
 --- !u!1 &1064656198
 GameObject:
   m_ObjectHideFlags: 0
@@ -1356,6 +1398,10 @@ PrefabInstance:
     - target: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Name
       value: Enemy_Test_C
+      objectReference: {fileID: 0}
+    - target: {fileID: 5818295318563038290, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8964247528649760068, guid: 98ba3a55b6386874292958113abb7a5c, type: 3}
       propertyPath: m_Target

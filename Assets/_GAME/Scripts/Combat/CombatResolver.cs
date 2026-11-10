@@ -11,6 +11,7 @@ public class CombatResolver : MonoBehaviour
 
     private static int nextSessionId;
     private int sessionId;
+    public int SessionId => sessionId;
     private int nextSpawnId;
     private int lastResolvedFrame = -1;
 
@@ -18,7 +19,15 @@ public class CombatResolver : MonoBehaviour
     {
         sessionId = ++nextSessionId;
         nextSpawnId = 0;
+        hits.Clear();
+        escapes.Clear();
+        lastResolvedFrame = -1;
         Registry.ClearSession();
+    }
+
+    private void LateUpdate()
+    {
+        ResolvePendingBatch();
     }
 
     public void RegisterEnemy(Enemy enemy)
