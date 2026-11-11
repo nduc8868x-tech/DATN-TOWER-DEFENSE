@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(10000)]
 public class CombatResolver : MonoBehaviour
 {
     private readonly Queue<HitRequest> hits = new Queue<HitRequest>();
@@ -24,6 +25,12 @@ public class CombatResolver : MonoBehaviour
             if (projectile != null && projectile.SessionId == session) projectile.Cancel();
     }
     private void OnDestroy() => CleanupProjectiles(sessionId);
+
+    public void InvalidateSession()
+    {
+        sessionId = 0;
+        hits.Clear(); escapes.Clear(); Registry.ClearSession();
+    }
 
     public void BeginSession()
     {
@@ -67,7 +74,7 @@ public class CombatResolver : MonoBehaviour
 
     public void ResolvePendingBatch()
     {
-        if (sessionId == 0 || lastResolvedFrame == Time.frameCount)
+        if (Time.timeScale <= 0f || sessionId == 0 || lastResolvedFrame == Time.frameCount)
             return;
 
         lastResolvedFrame = Time.frameCount;

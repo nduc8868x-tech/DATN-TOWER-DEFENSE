@@ -1,0 +1,49 @@
+Unity Play Mode Level01 integration checks | 2026-11-12T03:02:22
+Real prefab/service tests unless explicitly marked injected boundary/failure.
+PASS Initial/reset 240 gold, 20 lives, wave 1, empty scene runtime
+PASS Buy real Arrow: 240 -> 140
+PASS Double purchase: one tower and one charge
+PASS Sell Arrow I refunds 70, clears point
+PASS 99 gold: rejected without tower or charge
+PASS Injected missing factory catalog: no gold/point mutation
+PASS Failed real factory creation leaves no garbage
+PASS Injected atomic upgrade rejection AFTER money reservation: refund, unchanged level/stats/investment
+PASS Real TryApplyLevel invalid muzzle: atomic failure
+PASS Upgrade real Arrow II: cost 100 from TowerData
+PASS Sell Arrow II investment 200 refunds 140
+PASS Real normal hit before escape in same batch: Dead +8, no leak
+PASS Duplicate result ignored for gold/lives/alive
+PASS Wrong wave, unregistered identity and old/foreign session rejected
+PASS Real normal escape subtracts one life
+PASS Restart during Death + stale callback: clean reset, no reward/leak
+PASS Repeated Start creates only one schedule
+PASS Wave remains Running before spawnFinished
+PASS Real arrow projectile in flight
+PASS Paused services reject buy/upgrade/sell
+PASS Pause freezes enemies, projectiles, cooldown and spawn clock
+PASS Resume has no mass catch-up spawn
+PASS Restart while projectile flying: no enemy/tower/projectile/old schedule
+PASS Restart from pause restores timeScale and initial UI state
+PASS Repeated restarts do not multiply session/service listeners
+PASS Natural gameplay Start wave 1
+PASS Natural wave 1 completes within limit
+PASS Natural gameplay Start wave 2
+PASS Natural wave 2 completes within limit
+PASS Natural gameplay Start wave 3
+PASS Natural wave 3 completes within limit
+PASS Play all 3 real waves reaches Victory
+Natural match result: Victory, gold=176, lives=20, wave=3, spawned=10
+PASS Victory services reject buy/upgrade/sell
+PASS Restart after three-wave Victory
+PASS SpawnFinished with living enemies does not finish wave 1
+PASS SpawnFinished with living enemies does not finish wave 2
+PASS SpawnFinished with living enemies does not finish wave 3
+PASS Final batch lethal final escape: Defeat takes priority, no +20 reward/Victory
+PASS Defeat services reject buy/upgrade/sell
+PASS Restart after Defeat
+PASS Spawn failure: exact reason, three attempts, zero counts/reward, bounded abort
+PASS Aborted spawn schedule stays stopped
+PASS Restart after spawn failure resets scheduling and diagnostics
+PASS One manager set, one resolver runner, one EventSystem
+PASS HUD initial snapshot and controls after restart
+TOTAL: 45 passed, 0 failed

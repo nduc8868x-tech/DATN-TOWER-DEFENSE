@@ -462,6 +462,7 @@ MonoBehaviour:
   enemySpawnServiceProvider: {fileID: 1000000004}
   towerFactoryProvider: {fileID: 1000000005}
   combatResolver: {fileID: 0}
+  waveManager: {fileID: 0}
   startingLives: 20
   startingGold: 240
   totalWaves: 10
@@ -514,6 +515,7 @@ MonoBehaviour:
   gameSession: {fileID: 1000000002}
   economyManager: {fileID: 1000000003}
   bootstrapper: {fileID: 1000000006}
+  catalog: {fileID: 11400000, guid: c712a67d6017d9b459eb0a36a9c17ffb, type: 2}
 --- !u!1001 &2000000001
 PrefabInstance:
   m_ObjectHideFlags: 0

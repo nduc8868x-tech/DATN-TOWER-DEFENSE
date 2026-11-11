@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class TowerFactory : MonoBehaviour
+public sealed class TowerFactory : MonoBehaviour, ITowerFactory
 {
     public TowerCatalog catalog;
     public CombatResolver resolver;

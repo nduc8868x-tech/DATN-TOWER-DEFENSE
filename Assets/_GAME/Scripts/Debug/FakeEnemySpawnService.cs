@@ -63,6 +63,7 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
     }
 
     public event Action<EnemyResolved> Resolved;
+    public string LastError { get; private set; } = "";
 
     public void SetActiveSessionId(int sessionId)
     {
@@ -71,8 +72,10 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
 
     public bool TrySpawn(EnemySpawnRequest request, out EnemyHandle handle)
     {
+        LastError = "";
         if (failNextSpawn)
         {
+            LastError = "Injected fake spawn failure.";
             failNextSpawn = false;
             handle = default;
             Debug.LogWarning("[FakeEnemySpawnService] FailNextSpawn đang bật -> TrySpawn trả về false.");
@@ -81,6 +84,7 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
 
         if (request.SessionId <= 0 || string.IsNullOrEmpty(request.EnemyId))
         {
+            LastError = "Invalid fake spawn request.";
             handle = default;
             Debug.LogError("[FakeEnemySpawnService] EnemySpawnRequest không hợp lệ (thiếu SessionId hoặc EnemyId).");
             return false;
@@ -129,10 +133,10 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
         return true;
     }
 
-    public void BeginMovement(EnemyHandle handle)
+    public bool BeginMovement(EnemyHandle handle)
     {
         if (!handle.Identity.IsValid)
-            return;
+            return false;
 
         for (int i = 0; i < entries.Count; i++)
         {
@@ -140,14 +144,15 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
             if (entry.sessionId == handle.Identity.SessionId && entry.spawnId == handle.Identity.SpawnId)
             {
                 if (entry.isCleanedUp || entry.isResolved)
-                    return;
+                    return false;
 
                 entry.movementStarted = true;
                 if (entry.gameObject != null && entry.gameObject.TryGetComponent<SpriteRenderer>(out SpriteRenderer sr))
                     sr.color = Color.green; // Đã bắt đầu di chuyển
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public void CleanupSession(int sessionId)
@@ -347,3 +352,4 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
         return cachedEnemySprite;
     }
 }
+

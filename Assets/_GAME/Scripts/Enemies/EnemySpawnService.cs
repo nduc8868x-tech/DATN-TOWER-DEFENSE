@@ -3,16 +3,19 @@ using UnityEngine;
 using UnityEngine.Splines;
 
 [DisallowMultipleComponent]
-public class EnemySpawnService : MonoBehaviour
+public class EnemySpawnService : MonoBehaviour, IEnemySpawnService
 {
     [SerializeField] private EnemyCatalog catalog;
     [SerializeField] private CombatResolver resolver;
 
     private readonly List<Enemy> spawnedEnemies = new List<Enemy>();
+    public string LastError { get; private set; } = "";
     
     public event System.Action<EnemyResolved> Resolved;
     // The owner of a spawn schedule must cancel it before instances are removed.
     public event System.Action<int> SessionCleaningUp;
+    public bool TrySpawn(EnemySpawnRequest request, out EnemyHandle handle) =>
+        TrySpawn(request.SessionId, request.WaveId, request.EnemyId, request.Path, out handle);
 
 private readonly Dictionary<EnemyIdentity, SpawnInfo> spawnInfo =
     new Dictionary<EnemyIdentity, SpawnInfo>();
@@ -39,42 +42,49 @@ private readonly struct SpawnInfo
         out EnemyHandle handle)
     {
         handle = default;
+        LastError = "";
 
         if (!Application.isPlaying || !isActiveAndEnabled)
-            return false;
+        { LastError = "Spawn service is disabled or outside Play Mode."; return false; }
 
         if (resolver == null || catalog == null)
         {
+            LastError = "Missing enemy catalog or combat resolver.";
             Debug.LogError("Spawn Service chưa được gán Catalog hoặc Resolver.", this);
             return false;
         }
 
         if (sessionId <= 0 || sessionId != resolver.SessionId)
         {
+            LastError = "Spawn session does not match the active combat session.";
             Debug.LogWarning("Yêu cầu sinh quái thuộc lượt chơi không hợp lệ.", this);
             return false;
         }
 
         if (waveId <= 0)
         {
+            LastError = "Wave id must be positive.";
             Debug.LogWarning("Wave Id phải lớn hơn 0.", this);
             return false;
         }
 
         if (!catalog.TryValidate(out string error))
         {
+            LastError = error;
             Debug.LogError(error, catalog);
             return false;
         }
 
         if (!catalog.TryGet(enemyId, out EnemyData data))
         {
+            LastError = $"Unknown enemy id '{enemyId}'.";
             Debug.LogWarning($"Không tìm thấy Enemy Id '{enemyId}'.", this);
             return false;
         }
 
         if (path == null || path.Spline == null || path.Spline.Count < 2)
         {
+            LastError = "Spline requires at least two knots.";
             Debug.LogWarning("Đường đi cần có ít nhất hai knot.", this);
             return false;
         }
@@ -83,6 +93,7 @@ private readonly struct SpawnInfo
             float.IsNaN(data.speed) ||
             float.IsInfinity(data.speed))
         {
+            LastError = $"{data.name}: speed must be finite and positive.";
             Debug.LogError($"{data.name}: Speed phải hữu hạn và lớn hơn 0.", data);
             return false;
         }
@@ -92,6 +103,7 @@ private readonly struct SpawnInfo
             !data.prefab.GetComponent<EnemyHealth>().enabled ||
             !data.prefab.GetComponent<EnemyMovement>().enabled)
         {
+            LastError = $"{data.prefab.name}: enemy prefab or required components disabled.";
             Debug.LogError(
                 $"{data.prefab.name}: Bật object gốc và các component " +
                 "Enemy, EnemyHealth, EnemyMovement trước khi sinh.",
@@ -111,6 +123,7 @@ private readonly struct SpawnInfo
 
         if (!movement.Initialize(path, data.speed))
         {
+            LastError = "Enemy movement initialization failed.";
             instance.SetActive(false);
             Destroy(instance);
             return false;
@@ -121,6 +134,7 @@ private readonly struct SpawnInfo
 
         if (!handle.IsAlive)
         {
+            LastError = "Combat registry rejected spawned enemy.";
             resolver.Registry.Remove(enemy.Identity);
             instance.SetActive(false);
             Destroy(instance);

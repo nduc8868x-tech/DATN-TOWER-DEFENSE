@@ -1,77 +1,78 @@
-# Buổi 12 — Ghép lần đầu với B
+﻿# Integration notes — basic Level01 loop
 
-Trạng thái: **Phần A đã kiểm tra; chờ tích hợp Level01**. Chưa đạt buổi 12/M3 tích hợp thật.
+Updated 2026-11-12. The basic loop is integrated in the existing project and was exercised in Unity Play Mode. No new Unity project, package upgrade, push or merge into main.
 
-## Đầu vào
+## Git preservation and integration
 
-- Nhánh main, HEAD `01d8979092cfb7126def15d1e0ce30a641aaf4d9`.
-- Có thay đổi chưa commit của buổi 10–11: Projectile/ShotContext, Tower, resolver/cleanup, TowerFactory/Handle/Snapshot/Catalog, các bộ debug, CombatSandbox và data đạn cung. Cả .vscode/settings.json, tài liệu DOCX, asset nguồn và slnx có sẵn được giữ nguyên. HEAD chưa đại diện toàn bộ code được thử.
-- Đã đọc mục Buổi 12 trong Huong_dan_24_buoi_nguoi_A_DATN.docx và các nội dung phối hợp/M3 trong Quy_trinh_chi_tiet_DATN_Tower_Defense.docx. Không tìm thấy AGENTS.md hoặc Docs/Contracts.md trong project. Không tạo Shared thứ hai hoặc tự sửa Shared do B sở hữu.
-- Level01 được kiểm tra bằng YAML trên đĩa, không mở/sửa/lưu: có bản đồ, EnemyPath_Spline, EnemyMovementTest/EnemyMovement. Chưa có cấu hình combat tích hợp. Tìm code trong Assets không thấy GameSession, WaveManager hoặc Wallet; chưa có ô xây/mua bán và công cụ duplicate của B để chạy kinh tế.
+- Initial branch: main at 01d8979. origin/hiep was not integrated; it contained B's session/economy/build/input/fakes and FlowSandbox.
+- Created integration/level01-basic-loop. Checkpoint b09b53c preserves all tracked edits plus A runtime scripts/prefabs/data, notes/screenshots and existing local project changes. backup/pre-b-integration-20261112 points to it.
+- Fetched hiep from the requested repository; its head was a94eb82. Merge commit 735bbb0 integrates it. Three add/add conflicts in Shared.meta, EnemyResolved.cs and its .meta were resolved explicitly, retaining A's identity payload and GUIDs; B caller compatibility was added afterwards.
+- The 1.9 GB source CraftPix directory, three source DOCX files and Word lock file remain on disk, untracked and untouched. The first broad staging attempt was interrupted; the stale index lock was removed only after no git process remained, then staging was limited to project work. No reset --hard, clean or whole-tree ours/theirs was used.
+- All feature work AFTER the merge remains uncommitted for review. main still points at 01d8979. No push.
 
-## Cấu hình B cần gán
+## Completed sequence and wiring
 
-1. Một CombatResolver duy nhất. Gọi BeginSession trước spawn/create; lấy SessionId từ resolver, không tự đoán ID.
-2. EnemySpawnService: EnemyCatalog_Main và cùng resolver. Truyền SplineContainer của tuyến đường thật vào TrySpawn. Catalog normal dùng EnemyData_Normal (60 HP, bounty8, leak1).
-3. TowerFactory: TowerCatalog.asset ánh xạ arrow → TowerData_Arrow; cùng resolver. Tháp và đạn lấy prefab từ data hiện có, không cần copy script.
-4. B lưu Level01; tắt EnemyMovementTest, EnemySpawnTest/fake spawn, FakeBuildCaller, TowerDefinitionTest, TowerAttackTest, ProjectileTest và CombatTestRunner trong scene tích hợp.
+1. Read A/B DOCX guides, coordination guide and existing A session/integration notes. No applicable AGENTS.md or existing Docs/Contracts.md was found; Contracts.md is now the current common contract.
+2. Merged B, removed duplicate tower contracts and kept A's GUIDs/API overloads. Shared real/fake providers compile together.
+3. Real combat smoke in Level01: runtime-only placed Arrow at (-4.5, 0), five normal, 1.5 s interval. Observed 16 shots, 3 kills, 2 escapes, gold 284, lives 18, alive 0, manual-start waiting state. The placed test tower was never saved.
+4. Added ONE build point and saved Canvas, then tested real purchase, duplicate rejection, upgrade and sale (refund 140). Only after this succeeded, added eight points.
+5. Ran the opt-in integration verification suite against saved Level01, including full three-wave real gameplay; detailed per-test evidence is Docs/IntegrationTestResults.txt. Additional UI event/raycast checks and sandbox validation are recorded below.
 
-**Khác tài liệu cần chốt:** runner hiện tại là `CombatResolver.LateUpdate`, không phải CombatTestRunner. Tìm caller trong Assets chỉ thấy resolver tự gọi ResolvePendingBatch. B không thêm runner gọi lần nữa. Producer gửi hit/escape trong Update. B có thể gom EnemySpawnService.Resolved vào buffer rồi xử lý ở LateUpdate với Script Execution Order sau CombatResolver; cập nhật toàn bộ kết quả trước khi xét thua/wave/thắng. Nếu muốn chuyển quyền runner sang B, hai bên phải đổi đồng bộ; A chưa đổi API một phía.
+Saved Level01 keeps the original map, EnemyPath_Spline, camera and 2D light. MovementTest is disabled and old placed test enemies are inactive (retained, not deleted). Its Systems object contains exactly one EconomyManager, GameSession, CombatResolver, EnemySpawnService, TowerFactory, WaveManager, FlowBootstrapper, BuildManager and BuildInputController.
 
-## Hợp đồng gọi
+Assigned references:
 
-```csharp
-if (spawnService.TrySpawn(resolver.SessionId, waveId, "normal", path, out var enemy))
-{
-    // B lưu enemy.Identity/handle, tăng spawned và alive trước khi cho chạy.
-    spawnService.BeginMovement(enemy);
-}
-if (factory.TryCreate("arrow", 1, position, out var tower))
-{
-    tower.ReadSnapshot(out var snapshot); // Cost từ data chung; chưa bắn
-    if (transactionSucceeded) tower.Activate();
-    else tower.Dispose();
-}
-```
+- EnemySpawnService -> EnemyCatalog_Main.asset + Systems CombatResolver.
+- TowerFactory -> existing TowerCatalog.asset (arrow/rock) + same CombatResolver.
+- FlowBootstrapper -> real EnemySpawnService/TowerFactory + same session/economy/resolver/waves.
+- WaveManager -> original EnemyPath_Spline + Data/Waves/Wave01, Wave02, Wave03 (5/7/10, interval 1.5).
+- BuildManager -> same session/economy/bootstrapper + TowerCatalog. BuildInput -> Main Camera + session, default-layer point colliders.
+- Eight points at (-7.5,-0.5), (-4.6,0), (-4.7,2.5), (-2.8,2.5), (-2,-0.6), (0.1,1.5), (2.7,0.4), (0.9,3.1); all reuse existing UI marker sprite, off the spline, and cover useful path segments.
+- LevelHUD Canvas -> same managers/input and serialized UI controls. One EventSystem with InputSystemUIInputModule.
+- No fake provider or debug combat runner is active in Level01; only CombatResolver calls ResolvePendingBatch.
 
-B xử lý Activate/BeginMovement trả false như lỗi giao dịch/kích hoạt, không để bộ đếm hoặc ô xây treo. A không trừ tiền. TryApplyLevel chỉ nhận cấp kế tiếp; Dispose gọi lặp an toàn. B giữ các handle để Suspend/Dispose khi bán hoặc restart.
+Arrow data was already purchase 100 / upgrade 100, so no price or stat changes were needed. Rock assets/progress remain intact; buying is restricted to arrow. Three waves are integration data, not final balancing.
 
-EnemyResolved có Identity(SessionId,SpawnId), WaveId, State, Bounty, LeakDamage. B lọc session/wave, kiểm ID thuộc wave và dedup bằng Identity trước khi cập nhật vàng/mạng/alive. Dead cộng Bounty, Escaped trừ LeakDamage. Sau toàn bộ batch: xét thua trước, wave chỉ xong khi spawnFinished && alive == 0. Không suy ra spawnFinished từ registry rỗng.
+## Changed files for review
 
-Restart: B khóa giao dịch và dừng lịch spawn; Suspend/Dispose mọi tháp; gọi spawnService.CleanupSession(oldSession) trước resolver.BeginSession; xóa buffer/dedup/counters cũ rồi khởi tạo wave mới. Cleanup dọn cả enemy Death và projectile, không phát Dead/Escaped. BeginSession một mình không thay cho CleanupSession. Subscribe/Unsubscribe Resolved cân bằng một lần theo vòng đời, tránh đăng ký mỗi wave mà không bỏ.
+- Scenes/Level01.unity: real service wiring, disabled old debug flow, eight build points, Canvas, EventSystem; original scene GUID/prefab references retained.
+- Scripts/Core/GameSession.cs, FlowBootstrapper.cs: registered results, shared session ID, batch ordering, single restart path.
+- Scripts/Economy/EconomyManager.cs; Scripts/Building/BuildManager.cs, BuildInputController.cs: reserved transactions, TowerData prices, state/reentry gates and UI raycast blocking. Existing BuildPoint implementation is reused.
+- Scripts/Combat/CombatResolver.cs; Scripts/Enemies/EnemySpawnService.cs: execution order, pause/invalidation gate, common spawn interface and provider failure reason. Existing registry, health, movement and projectiles reused.
+- Scripts/Towers/TowerFactory.cs, TowerHandle.cs, TowerSnapshot.cs; Scripts/Shared/EnemyResolved.cs, IEnemySpawnService.cs: common real/fake contracts; duplicate Shared TowerHandle/TowerSnapshot files and their unused type metas removed.
+- Scripts/Debug/FakeEnemySpawnService.cs, FakeTowerFactory.cs, FlowSandboxDebugPanel.cs: update to bool lifecycle, registered identities and catalog price API; only Arrow purchase offered.
+- New Scripts/Waves/WaveData.cs, WaveManager.cs, Data/Waves/Wave01-03.asset, Scripts/UI/LevelHUD.cs, Editor/Level01Setup.cs and their .meta files.
+- New opt-in Scripts/Debug/LevelIntegrationChecks.cs (.meta): automated Play Mode checks, not attached to saved scenes.
+- Docs/Contracts.md, IntegrationNotes.md, IntegrationTestResults.txt.
+- Unity regenerated solution/editor-project entry and some settings for already-installed packages; no manifest/lock upgrade during feature work. Earlier local package edits are preserved in the checkpoint.
 
-## Ma trận kiểm thử
+## Running the game
 
-| Ca | Level01 | Sandbox/phân tích A |
-|---|---|---|
-| A: 5 normal + cung, wave hoàn tất đúng | Chưa kiểm tra: thiếu wave/session B | Bộ spawn được chạy riêng; không thay thế wave tích hợp với cung |
-| B: 240→140, ô xây, rollback | Chưa kiểm tra: thiếu giao dịch/ô xây B | FakeBuildCaller 20/20 đạt: inactive trước Activate, rollback, vòng đời/nâng cấp |
-| C: thưởng8 và duplicate không cộng lại | Chưa kiểm tra: thiếu GameSession và công cụ duplicate B | A phát payload và chống kết quả trùng; không chứng minh dedup của B |
-| D: leak1, kill thắng escape cùng batch | Chưa kiểm tra mạng/vàng B | Kiểm resolver hit trước escape, CanResolve yêu cầu Alive; bộ spawn kiểm payload |
-| E: restart đạn bay/Death | Chưa kiểm tra restart trận B | Có bộ ProjectileTest kiểm cleanup/session cũ; cần chạy và ghi riêng, không gọi là restart Level01 |
+1. Open Assets/_GAME/Scenes/Level01.unity with the existing Unity 6000.3.11f1.
+2. Press Play. HUD shows 240 gold / 20 lives / wave 1 of 3. Select a marked point, then Buy Arrow (100).
+3. For a repeatable winning run, buy at BuildPoint_01 and BuildPoint_02; press Start Wave. After wave 1, upgrade the first arrow when affordable. Start wave 2 manually, then upgrade the second when affordable. Start wave 3.
+4. Select occupied points to upgrade/sell. Each wave needs Start; Pause switches to Resume. Restart works while preparing, fighting, paused or on the result panel.
+5. Victory/Defeat displays a modal panel. Restart returns to initial 240/20 with all points empty.
 
-FakeBuildCaller chạy lại trong lượt buổi12: 20/20 đạt. Cooldown 0.399394/0.8→0.324508/0.65; nhịp cấp II đo0.652138 giây. Chi tiết tiêu chí ở Docs/PersonA/Session11.md.
+To rerun verification: open Level01, enter Play, choose DATN > Integration > Run Level01 Checks (Play Mode). Let it finish; the runtime-only test object logs each case and writes Docs/IntegrationTestResults.txt. It uses failure/result/last-life injections only where labeled, and runs the complete normal gameplay match without forced kills. The separate lethal-boundary run uses timeScale 8 for scheduling and injects the last-life value. Stop Play afterwards; never save runtime test values to scene/data. DATN > Integration > Configure Level01 Gameplay can repair saved wiring/UI against the existing Systems object outside Play Mode.
 
-EnemySpawnTest chạy lại: **15/15 đạt**. Năm SpawnId riêng; thời điểm sinh 21.9323, 22.7345, 23.5393, 24.34138, 25.14303 giây. Wave giả không có tháp active: Dead0, Escaped5, registry cuối0; không phải ca A Level01. Kiểm TrySpawn đứng chờ, BeginMovement, duplicate hit/escape cho một Dead(bounty8/leak0), duplicate escape cho một Escaped(bounty0/leak1), cleanup giữa lịch sinh không phát kết quả đều đạt.
+## Verification and limits
 
-ProjectileTest chạy lại: **23/23 đạt**, HP60→44→28→12→0; pause/resume, target hủy/chết, đạn sống sau dọn tháp, cleanup đạn và chặn session cũ đạt. Restart thật khi đang animation Death, dedup kinh tế và event của B vẫn **chưa kiểm tra**. Kết thúc đã Stop Play. Không thay scene/prefab/script trong buổi12, không có .meta mới cần tạo (chỉ tài liệu ngoài Assets).
+See the per-case report for gold/lives, buy/upgrade/sell failures, duplicate/foreign results, registered identities, wave gates, Start spam, lethal final batch, pause and restart, listener/manager counts and real three-wave Victory. The first complete suite was 42 PASS / 0 FAIL; the final report also includes bounded spawn failure checks.
 
-## Dependency còn thiếu / bàn giao lỗi
+Additional executed UI checks: EventSystem RaycastAll at BuyArrow returned BuyArrow and BuildMenu. Pointer-click events on Buy/Upgrade/Sell/Pause/Restart executed their bound actions (purchase gold 140, upgrade II, pause state, reset 240/20). ScreenCapture screenshot verified the Canvas labels, markers and menu layout. This is in-editor event automation, not an OS-level physical mouse/touch test. Mobile aspect ratios and a standalone player build have not been tested.
 
-- Scene Level01, input wave5 normal + cung: mong có luồng trận và alive cuối wave; thực tế chưa có GameSession/wave/cấu hình dịch vụ. Tái hiện bằng kiểm component YAML và tìm class trong Assets. B bổ sung và lưu scene; đây là dependency thiếu, chưa kết luận bug runtime B.
-- Input mua cung100 từ240: chưa có caller giao dịch/ô xây nên chưa đo140. B triển khai caller theo thứ tự Create→commit→Activate, rollback Dispose và trả ô xây.
-- Input gửi lặp EnemyResolved: chưa có công cụ B; B cần nút/test gửi cùng Identity hai lần và kiểm vàng/alive không đổi lần hai.
-- Thứ tự batch: B phải xử lý đủ buffer trước kiểm endgame. Tài liệu yêu cầu runner thật nhưng code dùng resolver tự chạy; hướng dẫn trên tránh runner thừa.
-- Chưa phát hiện lỗi A cần đổi API trong lần rà soát này. A sẽ kiểm lại Level01 sau khi B gán xong; không viết thay kinh tế/wave.
+Unity MCP occasionally emitted internal PlayerLoop recursion messages during screenshot/tool pumping, and the existing account integration logged an Account API timeout. These are recorded separately from the gameplay checks; no script compilation error was reported. No API purchase/login change was attempted.
 
-## Checklist M3
+No 10-wave expansion, SaveService, complete main menu, new combat mechanic or final balance work was added.
 
-- [x] Factory và vòng đời tháp A chạy thật trong sandbox.
-- [x] Hướng dẫn dependency, API và thứ tự batch/restart.
-- [ ] B lưu Level01 và chốt commit B; hai bên thống nhất snapshot code A chưa commit.
-- [ ] Chạy Level01 A–E, ghi SpawnId/Dead/Escaped/alive và vàng/mạng.
-- [ ] Kiểm duplicate ở GameSession, restart khi Death, đăng ký event/runner sau nhiều lần restart.
-- [ ] Video minh chứng M3: chưa quay, không có video bàn giao.
-- [ ] Xác nhận đạt buổi12 bằng tích hợp thật.
+## Sandbox checks executed after integration
 
-Tự chạy A: mở CombatSandbox, Play, lần lượt FakeBuildCaller → Session11/Run All Checks; EnemySpawnTest → Debug/07; ProjectileTest → Session10/Run Projectile Checks. Chờ bộ trước xong, không chạy đồng thời. B dùng các bước cấu hình ở trên, sau đó chạy A–E trong Level01 và gửi report cho A.
+- FlowSandbox path is Assets/_GAME/Tests/FlowSandbox/FlowSandbox.unity (B's original location). Assigned the shared TowerCatalog to its BuildManager and saved. Missing scripts: 0. Play Mode: real shared price lookup with fake creation; buy accepted, injected fake upgrade rejected with 140 gold and level I unchanged, next upgrade accepted, sale refund 140. Registered fake normal death gave gold 188; duplicate stayed 188; shared restart returned 240/20. Its legacy debug total-wave label remains 10; no ten-wave gameplay was created.
+- CombatSandbox loaded with missing scripts 0 and scriptCompilationFailed false. Existing A FakeBuildCaller regression ran 20/20 PASS, including cooldown ratio, old arrow damage snapshot and safe disposal. Detailed output: CombatSandboxFactoryResults.txt.
+- Final Level01 integration suite: 45 PASS / 0 FAIL, including bounded spawn failure and restart after it. See IntegrationTestResults.txt for every individual assertion.
+- HUD evidence: Level01-HUD.png, captured in Play Mode after clean reset and selecting an empty point. No test runtime state was saved back to scene/prefab/data.
+
+Final UI follow-up: separated Buy and Upgrade screen regions so a double click cannot buy then unintentionally upgrade. A fresh EventSystem raycast after the first click hits BuildMenu, not Upgrade: one tower, level I, gold 140. Result is IntegrationUIResults.txt; screenshot Level01-ArrowHUD.png shows actual arrow and upgrade/sale menu. The initial synthetic UI probe needed Canvas.ForceUpdateCanvases after enabling the menu; the corrected probe passed. Physical OS mouse/touch input remains outside this automated check.
+
+Existing ProjectileTest also completed 23/23 PASS (CombatSandboxProjectileResults.txt), including pause/resume, independent projectiles after tower disposal, old shot damage snapshots, cleanup and old-session rejection. Combined automated suites: Level01 45/45, A factory/cooldown 20/20, A projectiles 23/23. Final editor compilation status: scriptCompilationFailed false. Unity was stopped on Level01; no test runner or purchased tower is saved in it.
