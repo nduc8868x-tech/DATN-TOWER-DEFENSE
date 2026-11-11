@@ -355,6 +355,8 @@ GameObject:
   - component: {fileID: 1000000005}
   - component: {fileID: 1000000006}
   - component: {fileID: 1000000007}
+  - component: {fileID: 1000000008}
+  - component: {fileID: 1000000009}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -478,6 +480,127 @@ MonoBehaviour:
   bootstrapper: {fileID: 1000000006}
   fakeEnemyService: {fileID: 1000000004}
   fakeTowerFactory: {fileID: 1000000005}
+  buildInput: {fileID: 1000000008}
+  buildManager: {fileID: 1000000009}
+--- !u!114 &1000000008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf9acf73c354800aeab3b270f5d6c1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildInputController
+  mainCamera: {fileID: 519420031}
+  buildPointLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  gameSession: {fileID: 1000000002}
+--- !u!114 &1000000009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cf69e19f374426eb8e851dbc530a793, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildManager
+  gameSession: {fileID: 1000000002}
+  economyManager: {fileID: 1000000003}
+  bootstrapper: {fileID: 1000000006}
+--- !u!1001 &2000000001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 10000000000, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_Name
+      value: BuildPoint_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000010, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000010, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000040, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: pointId
+      value: BP_01
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+--- !u!1001 &2000000002
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 10000000000, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_Name
+      value: BuildPoint_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000010, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000010, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000040, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: pointId
+      value: BP_02
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+--- !u!1001 &2000000003
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 10000000000, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_Name
+      value: BuildPoint_03
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000010, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000010, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 10000000040, guid: 5bacae480896414d844be051893d2bd3, type: 3}
+      propertyPath: pointId
+      value: BP_03
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5bacae480896414d844be051893d2bd3, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -485,3 +608,6 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 1000000001}
+  - {fileID: 2000000001}
+  - {fileID: 2000000002}
+  - {fileID: 2000000003}

@@ -1,16 +1,18 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class FlowSandboxDebugPanel : MonoBehaviour
 {
+    private static readonly Rect PanelRect = new Rect(16, 16, 410, 720);
+
     [Header("References")]
     [SerializeField] private FlowBootstrapper bootstrapper;
     [SerializeField] private FakeEnemySpawnService fakeEnemyService;
     [SerializeField] private FakeTowerFactory fakeTowerFactory;
+    [SerializeField] private BuildInputController buildInput;
+    [SerializeField] private BuildManager buildManager;
 
-    private readonly List<(TowerHandle handle, int totalInvested)> builtTowers = new List<(TowerHandle, int)>();
-    private string lastStatusMessage = "San sang test FlowSandbox (Mục B02 - B05).";
+    private string lastStatusMessage = "Sẵn sàng test FlowSandbox (B02 - B08).";
     private SessionSnapshot latestSnapshot;
 
     private void Awake()
@@ -23,6 +25,12 @@ public class FlowSandboxDebugPanel : MonoBehaviour
 
         if (fakeTowerFactory == null)
             fakeTowerFactory = GetComponent<FakeTowerFactory>();
+
+        if (buildInput == null)
+            buildInput = GetComponent<BuildInputController>();
+
+        if (buildManager == null)
+            buildManager = GetComponent<BuildManager>();
     }
 
     private void OnEnable()
@@ -32,6 +40,8 @@ public class FlowSandboxDebugPanel : MonoBehaviour
             bootstrapper.Session.SnapshotChanged += HandleSnapshotChanged;
             latestSnapshot = bootstrapper.Session.GetSnapshot();
         }
+
+        BuildInputController.ExternalPointerBlocker = IsPointerOverPanel;
     }
 
     private void Start()
@@ -44,6 +54,15 @@ public class FlowSandboxDebugPanel : MonoBehaviour
     {
         if (bootstrapper != null && bootstrapper.Session != null)
             bootstrapper.Session.SnapshotChanged -= HandleSnapshotChanged;
+
+        if (BuildInputController.ExternalPointerBlocker == IsPointerOverPanel)
+            BuildInputController.ExternalPointerBlocker = null;
+    }
+
+    private static bool IsPointerOverPanel(Vector2 screenPos)
+    {
+        Vector2 guiPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
+        return PanelRect.Contains(guiPos);
     }
 
     private void HandleSnapshotChanged(SessionSnapshot snapshot)
@@ -57,10 +76,9 @@ public class FlowSandboxDebugPanel : MonoBehaviour
             return;
 
         GameSession session = bootstrapper.Session;
-        EconomyManager economy = bootstrapper.Economy;
 
-        GUILayout.BeginArea(new Rect(16, 16, 400, 660), GUI.skin.box);
-        GUILayout.Label("<b>FLOW SANDBOX DEBUG (B02 - B05)</b>");
+        GUILayout.BeginArea(PanelRect, GUI.skin.box);
+        GUILayout.Label("<b>FLOW SANDBOX DEBUG (B02 - B08)</b>");
         GUILayout.Space(4);
 
         GUILayout.Label($"Session ID: {session.SessionId}   |   State: {latestSnapshot.State}");
@@ -69,6 +87,17 @@ public class FlowSandboxDebugPanel : MonoBehaviour
         GUILayout.Label($"Trạng thái: {lastStatusMessage}");
         GUILayout.Space(8);
 
+        DrawEnemySection(session);
+        GUILayout.Space(10);
+        DrawBuildingSection();
+        GUILayout.Space(10);
+        DrawSessionSection(session);
+
+        GUILayout.EndArea();
+    }
+
+    private void DrawEnemySection(GameSession session)
+    {
         GUILayout.Label("--- TEST QUÁI & MẠNG (B02 / B04) ---");
 
         if (GUILayout.Button("1. Spawn 5 Quái Normal (M1 Test)"))
@@ -93,23 +122,20 @@ public class FlowSandboxDebugPanel : MonoBehaviour
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Emit Duplicate (Test Chống Trùng)"))
+        if (GUILayout.Button("Emit Duplicate (Chống Trùng)"))
         {
             fakeEnemyService?.DebugEmitDuplicate();
-            lastStatusMessage = "Đã cố ý phát trùng event — Vàng/Mạng không được đổi lần 2.";
+            lastStatusMessage = "Đã phát trùng event — Vàng/Mạng không được đổi lần 2.";
         }
 
         string failSpawnLabel = fakeEnemyService != null && fakeEnemyService.FailNextSpawn
             ? "Fail Next Spawn: BẬT"
             : "Fail Next Spawn: TẮT";
 
-        if (GUILayout.Button(failSpawnLabel))
+        if (GUILayout.Button(failSpawnLabel) && fakeEnemyService != null)
         {
-            if (fakeEnemyService != null)
-            {
-                fakeEnemyService.FailNextSpawn = !fakeEnemyService.FailNextSpawn;
-                lastStatusMessage = $"FailNextSpawn = {fakeEnemyService.FailNextSpawn}";
-            }
+            fakeEnemyService.FailNextSpawn = !fakeEnemyService.FailNextSpawn;
+            lastStatusMessage = $"FailNextSpawn = {fakeEnemyService.FailNextSpawn}";
         }
         GUILayout.EndHorizontal();
 
@@ -119,20 +145,62 @@ public class FlowSandboxDebugPanel : MonoBehaviour
             session.ResetAliveCount();
             lastStatusMessage = "Đã cleanup toàn bộ quái fake, không đổi vàng/mạng.";
         }
+    }
 
-        GUILayout.Space(10);
-        GUILayout.Label("--- TEST XÂY / NÂNG / BÁN THÁP (B02 / B05) ---");
+    private void DrawBuildingSection()
+    {
+        GUILayout.Label("--- ĐIỂM XÂY & MUA / NÂNG / BÁN (B06 - B08) ---");
 
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Mua Cung I (100g)"))
-            TryBuildFakeArcher(session, economy);
+        BuildPoint selected = buildInput != null ? buildInput.SelectedPoint : null;
 
-        if (GUILayout.Button("Nâng Cung II (100g)"))
-            TryUpgradeLastTower(session, economy);
+        if (selected == null)
+        {
+            GUILayout.Label("Ô đang chọn: <i>Chưa chọn — Click chuột vào ô vuông bên phải!</i>");
+        }
+        else if (!selected.IsOccupied)
+        {
+            GUILayout.Label($"Ô đang chọn: <b>{selected.PointId}</b> (Ô trống)");
+            GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("Bán Tháp Cuối (70%)"))
-            TrySellLastTower(session, economy);
-        GUILayout.EndHorizontal();
+            if (GUILayout.Button("Xây Arrow (100g)"))
+                HandleBuildClick(selected, "arrow");
+
+            if (GUILayout.Button("Xây Stone (140g)"))
+                HandleBuildClick(selected, "stone");
+
+            if (GUILayout.Button("Xây Magic (90g)"))
+                HandleBuildClick(selected, "magic");
+
+            GUILayout.EndHorizontal();
+        }
+        else
+        {
+            TowerSnapshot snap = selected.CurrentTowerHandle.ReadSnapshot();
+            string towerName = BuildManager.GetDisplayName(snap.TowerId);
+            GUILayout.Label($"Ô đang chọn: <b>{selected.PointId}</b> — {towerName} (Lv {snap.Level}/{snap.MaxLevel})");
+            GUILayout.Label($"Damage: {snap.Damage} | Chu kỳ: {snap.AttackInterval:0.##}s | Radius: {snap.Radius:0.##} | Vốn: {selected.TotalInvested}g");
+
+            GUILayout.BeginHorizontal();
+
+            if (snap.Level < snap.MaxLevel)
+            {
+                BuildManager.TryGetTowerCost(snap.TowerId, snap.Level + 1, out int upgCost);
+                if (GUILayout.Button($"Nâng cấp Lv{snap.Level + 1} ({upgCost}g)"))
+                    HandleUpgradeClick(selected);
+            }
+            else
+            {
+                GUI.enabled = false;
+                GUILayout.Button("ĐÃ CẤP TỐI ĐA");
+                GUI.enabled = true;
+            }
+
+            int refundPreview = BuildManager.CalculateSellRefund(selected.TotalInvested);
+            if (GUILayout.Button($"Bán (+{refundPreview}g)"))
+                HandleSellClick(selected);
+
+            GUILayout.EndHorizontal();
+        }
 
         GUILayout.BeginHorizontal();
         string failCreateLabel = fakeTowerFactory != null && fakeTowerFactory.FailCreate
@@ -153,8 +221,10 @@ public class FlowSandboxDebugPanel : MonoBehaviour
             lastStatusMessage = $"FailUpgrade = {fakeTowerFactory.FailUpgrade}";
         }
         GUILayout.EndHorizontal();
+    }
 
-        GUILayout.Space(10);
+    private void DrawSessionSection(GameSession session)
+    {
         GUILayout.Label("--- TEST STATE / PAUSE / RESTART (B03 / B11) ---");
 
         GUILayout.BeginHorizontal();
@@ -192,8 +262,42 @@ public class FlowSandboxDebugPanel : MonoBehaviour
                 }
             }
         }
+    }
 
-        GUILayout.EndArea();
+    private void HandleBuildClick(BuildPoint point, string towerId)
+    {
+        if (buildManager == null)
+        {
+            lastStatusMessage = "Thiếu BuildManager.";
+            return;
+        }
+
+        if (buildManager.TryBuild(point, towerId, out string error))
+            lastStatusMessage = $"Đã xây {BuildManager.GetDisplayName(towerId)} tại {point.PointId}.";
+        else
+            lastStatusMessage = error;
+    }
+
+    private void HandleUpgradeClick(BuildPoint point)
+    {
+        if (buildManager == null)
+            return;
+
+        if (buildManager.TryUpgrade(point, out string error))
+            lastStatusMessage = $"Đã nâng cấp tháp tại {point.PointId} lên Lv {point.CurrentLevel}.";
+        else
+            lastStatusMessage = error;
+    }
+
+    private void HandleSellClick(BuildPoint point)
+    {
+        if (buildManager == null)
+            return;
+
+        if (buildManager.TrySell(point, out int refund, out string error))
+            lastStatusMessage = $"Đã bán tháp tại {point.PointId} (+{refund}g).";
+        else
+            lastStatusMessage = error;
     }
 
     private void SpawnBatch(int count)
@@ -228,102 +332,10 @@ public class FlowSandboxDebugPanel : MonoBehaviour
         lastStatusMessage = $"Đã sinh {spawned}/{count} quái fake.";
     }
 
-    private void TryBuildFakeArcher(GameSession session, EconomyManager economy)
-    {
-        if (!session.BuildAllowed)
-        {
-            lastStatusMessage = $"Bị từ chối: Không được xây ở state {session.State}.";
-            return;
-        }
-
-        const int cost = 100;
-        if (!economy.CanAfford(cost))
-        {
-            lastStatusMessage = $"Không đủ vàng ({economy.CurrentGold}/{cost}).";
-            return;
-        }
-
-        Vector3 pos = new Vector3(-3.5f + (builtTowers.Count % 6) * 1.4f, -1.5f, 0f);
-        if (bootstrapper.TowerFactory == null || !bootstrapper.TowerFactory.TryCreate("archer", 1, pos, out TowerHandle handle))
-        {
-            lastStatusMessage = "Factory báo lỗi tạo tháp -> Vàng giữ nguyên (Rollback thành công).";
-            return;
-        }
-
-        if (!economy.TrySpend(cost))
-        {
-            handle.Dispose();
-            lastStatusMessage = "Lỗi trừ tiền -> Đã Dispose tháp thử.";
-            return;
-        }
-
-        handle.Activate();
-        builtTowers.Add((handle, cost));
-        lastStatusMessage = $"Đã xây Cung I (-{cost}g). Số tháp: {builtTowers.Count}";
-    }
-
-    private void TryUpgradeLastTower(GameSession session, EconomyManager economy)
-    {
-        if (!session.BuildAllowed || builtTowers.Count == 0)
-        {
-            lastStatusMessage = "Không có tháp hoặc state không cho phép nâng.";
-            return;
-        }
-
-        int idx = builtTowers.Count - 1;
-        var (handle, invested) = builtTowers[idx];
-        TowerSnapshot snap = handle.ReadSnapshot();
-
-        if (snap.Level >= snap.MaxLevel)
-        {
-            lastStatusMessage = "Tháp đã đạt cấp tối đa.";
-            return;
-        }
-
-        const int upgradeCost = 100;
-        if (!economy.CanAfford(upgradeCost))
-        {
-            lastStatusMessage = $"Không đủ vàng để nâng ({economy.CurrentGold}/{upgradeCost}).";
-            return;
-        }
-
-        if (!handle.TryApplyLevel(snap.Level + 1))
-        {
-            lastStatusMessage = "Factory lỗi nâng cấp -> Vàng và cấp giữ nguyên!";
-            return;
-        }
-
-        economy.TrySpend(upgradeCost);
-        builtTowers[idx] = (handle, invested + upgradeCost);
-        lastStatusMessage = $"Đã nâng lên cấp {snap.Level + 1} (-{upgradeCost}g). Tổng vốn: {invested + upgradeCost}";
-    }
-
-    private void TrySellLastTower(GameSession session, EconomyManager economy)
-    {
-        if (!session.BuildAllowed || builtTowers.Count == 0)
-        {
-            lastStatusMessage = "Không có tháp hoặc state không cho phép bán.";
-            return;
-        }
-
-        int idx = builtTowers.Count - 1;
-        var (handle, invested) = builtTowers[idx];
-        builtTowers.RemoveAt(idx);
-
-        handle.Suspend();
-        handle.Dispose();
-
-        int refund = Mathf.FloorToInt(0.7f * invested);
-        economy.AddGold(refund);
-        lastStatusMessage = $"Đã bán tháp (vốn {invested}) -> Hoàn {refund}g (70%).";
-    }
-
     private void RestartMatch()
     {
-        for (int i = 0; i < builtTowers.Count; i++)
-            builtTowers[i].handle?.Dispose();
-
-        builtTowers.Clear();
+        buildManager?.ClearAllTowers();
+        buildInput?.ClearSelection();
         bootstrapper.StartNewSession();
         lastStatusMessage = $"Đã Restart -> Session mới ID {bootstrapper.Session.SessionId} (240 vàng, 20 mạng).";
     }

@@ -46,14 +46,34 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
             return false;
         }
 
-        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        visual.name = $"FakeTower_{towerId}_Lv{level}";
+        GameObject visual = new GameObject($"FakeTower_{towerId}_Lv{level}");
         visual.transform.SetParent(transform, false);
         visual.transform.position = position;
-        visual.transform.localScale = new Vector3(0.75f, 0.4f, 0.75f);
 
-        handle = new FakeTowerHandle(this, visual, towerId, level, damage, interval, radius);
+        SpriteRenderer sr = visual.AddComponent<SpriteRenderer>();
+        sr.sprite = GetOrCreateTowerSprite();
+        sr.sortingOrder = 5;
+
+        handle = new FakeTowerHandle(this, visual, sr, towerId, level, damage, interval, radius);
         return true;
+    }
+
+    private static Sprite cachedTowerSprite;
+
+    private static Sprite GetOrCreateTowerSprite()
+    {
+        if (cachedTowerSprite == null)
+        {
+            Texture2D tex = Texture2D.whiteTexture;
+            cachedTowerSprite = Sprite.Create(
+                tex,
+                new Rect(0f, 0f, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f),
+                tex.width
+            );
+        }
+
+        return cachedTowerSprite;
     }
 
     internal bool ShouldFailUpgrade()
@@ -75,6 +95,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
 
         switch (towerId)
         {
+            case "arrow":
             case "archer":
                 if (level == 1) { damage = 16; interval = 0.8f; return true; }
                 if (level == 2) { damage = 28; interval = 0.65f; return true; }
@@ -99,6 +120,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
     {
         private readonly FakeTowerFactory owner;
         private readonly GameObject visual;
+        private readonly SpriteRenderer spriteRenderer;
         private readonly string towerId;
         private int level;
         private bool isActive;
@@ -110,6 +132,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
         public FakeTowerHandle(
             FakeTowerFactory owner,
             GameObject visual,
+            SpriteRenderer spriteRenderer,
             string towerId,
             int level,
             int damage,
@@ -118,6 +141,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
         {
             this.owner = owner;
             this.visual = visual;
+            this.spriteRenderer = spriteRenderer;
             this.towerId = towerId;
             this.level = level;
             this.damage = damage;
@@ -193,18 +217,18 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
             if (visual == null)
                 return;
 
-            visual.transform.localScale = new Vector3(0.75f, 0.4f * level, 0.75f);
+            visual.transform.localScale = new Vector3(0.6f, 0.55f + 0.3f * (level - 1), 1f);
 
-            if (visual.TryGetComponent<Renderer>(out Renderer rend))
+            if (spriteRenderer != null)
             {
                 if (!isActive)
-                    rend.material.color = Color.gray;
-                else if (towerId == "archer")
-                    rend.material.color = new Color(0.2f, 0.8f, 0.3f);
+                    spriteRenderer.color = Color.gray;
+                else if (towerId == "arrow" || towerId == "archer")
+                    spriteRenderer.color = new Color(0.2f, 0.85f, 0.35f);
                 else if (towerId == "stone")
-                    rend.material.color = new Color(0.8f, 0.5f, 0.2f);
+                    spriteRenderer.color = new Color(0.85f, 0.55f, 0.2f);
                 else
-                    rend.material.color = new Color(0.3f, 0.5f, 1.0f);
+                    spriteRenderer.color = new Color(0.3f, 0.6f, 1.0f);
             }
         }
     }

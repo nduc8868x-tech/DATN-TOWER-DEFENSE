@@ -89,18 +89,19 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
         activeSessionId = request.SessionId;
         int spawnId = ++nextSpawnId;
 
-        GameObject go = spawnVisualMarkers
-            ? GameObject.CreatePrimitive(PrimitiveType.Cube)
-            : new GameObject();
-
-        go.name = $"FakeEnemy_{spawnId}_{request.EnemyId}";
+        GameObject go = new GameObject($"FakeEnemy_{spawnId}_{request.EnemyId}");
         go.transform.SetParent(transform, false);
         int slot = entries.Count;
-        go.transform.position = new Vector3(-4f + (slot % 8) * 1.1f, 1.5f - (slot / 8) * 1.1f, 0f);
-        go.transform.localScale = Vector3.one * 0.6f;
+        go.transform.position = new Vector3(0.5f + (slot % 6) * 1.1f, 2.6f - (slot / 6) * 1.0f, 0f);
+        go.transform.localScale = Vector3.one * 0.65f;
 
-        if (go.TryGetComponent<Renderer>(out Renderer rend))
-            rend.material.color = Color.yellow; // Đang chờ BeginMovement
+        if (spawnVisualMarkers)
+        {
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = GetOrCreateEnemySprite();
+            sr.color = Color.yellow; // Đang chờ BeginMovement
+            sr.sortingOrder = 4;
+        }
 
         Enemy enemyComp = go.AddComponent<Enemy>();
         var identity = new EnemyIdentity(request.SessionId, spawnId);
@@ -142,8 +143,8 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
                     return;
 
                 entry.movementStarted = true;
-                if (entry.gameObject != null && entry.gameObject.TryGetComponent<Renderer>(out Renderer rend))
-                    rend.material.color = Color.green; // Đã bắt đầu di chuyển
+                if (entry.gameObject != null && entry.gameObject.TryGetComponent<SpriteRenderer>(out SpriteRenderer sr))
+                    sr.color = Color.green; // Đã bắt đầu di chuyển
                 return;
             }
         }
@@ -220,8 +221,8 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
 
         if (entry.gameObject != null)
         {
-            if (entry.gameObject.TryGetComponent<Renderer>(out Renderer rend))
-                rend.material.color = reason == ResolutionReason.Dead ? Color.gray : Color.red;
+            if (entry.gameObject.TryGetComponent<SpriteRenderer>(out SpriteRenderer sr))
+                sr.color = reason == ResolutionReason.Dead ? Color.gray : Color.red;
 
             entry.gameObject.SetActive(false);
         }
@@ -326,5 +327,23 @@ public class FakeEnemySpawnService : MonoBehaviour, IEnemySpawnService
                 leakDamage = defaultLeakDamage;
                 break;
         }
+    }
+
+    private static Sprite cachedEnemySprite;
+
+    private static Sprite GetOrCreateEnemySprite()
+    {
+        if (cachedEnemySprite == null)
+        {
+            Texture2D tex = Texture2D.whiteTexture;
+            cachedEnemySprite = Sprite.Create(
+                tex,
+                new Rect(0f, 0f, tex.width, tex.height),
+                new Vector2(0.5f, 0.5f),
+                tex.width
+            );
+        }
+
+        return cachedEnemySprite;
     }
 }
