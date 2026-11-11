@@ -174,6 +174,7 @@ enemy.Resolved += HandleEnemyResolved;
     public void CleanupSession(int sessionId)
     {
         SessionCleaningUp?.Invoke(sessionId);
+        if (resolver != null) resolver.CleanupProjectiles(sessionId);
 
         // Also remove metadata for destroyed objects whose Unity reference is now null.
         var identities = new List<EnemyIdentity>(spawnInfo.Keys);

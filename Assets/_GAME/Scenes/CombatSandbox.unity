@@ -869,6 +869,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &613131312
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 613131313}
+  - component: {fileID: 613131314}
+  m_Layer: 0
+  m_Name: RockSession13
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &613131313
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 613131312}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &613131314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 613131312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c0e2a711b9c40a7b0890c5b571282ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RockProjectileTest
+  factory: {fileID: 936505047}
+  spawnService: {fileID: 950048876}
+  path: {fileID: 2035270964}
+  buildPosition: {x: -2, y: 0, z: 0}
+  report: Not run
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,6 +997,70 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.29, y: -0.81, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &936505045
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 936505048}
+  - component: {fileID: 936505047}
+  - component: {fileID: 936505046}
+  m_Layer: 0
+  m_Name: TowerSession11
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &936505046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936505045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4157814b9d3fe9544b89735e4e13d1a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FakeBuildCaller
+  factory: {fileID: 936505047}
+  spawnService: {fileID: 950048876}
+  path: {fileID: 2035270964}
+  buildPosition: {x: -2, y: 0, z: 0}
+  report: Not run
+--- !u!114 &936505047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936505045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abf7a80903b4f464289fd19464401cf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TowerFactory
+  catalog: {fileID: 11400000, guid: c712a67d6017d9b459eb0a36a9c17ffb, type: 2}
+  resolver: {fileID: 950048873}
+--- !u!4 &936505048
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936505045}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1592,6 +1705,7 @@ GameObject:
   - component: {fileID: 1806561606}
   - component: {fileID: 1806561605}
   - component: {fileID: 1806561607}
+  - component: {fileID: 1806561608}
   m_Layer: 0
   m_Name: TowerSession8
   m_TagString: Untagged
@@ -1652,6 +1766,24 @@ MonoBehaviour:
   spawnService: {fileID: 950048876}
   resolver: {fileID: 950048873}
   path: {fileID: 2035270964}
+  report: Not run
+--- !u!114 &1806561608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1806561604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa74062f12fb444b860de55c293fe1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileTest
+  resolver: {fileID: 950048873}
+  spawnService: {fileID: 950048876}
+  path: {fileID: 2035270964}
+  towerData: {fileID: 11400000, guid: 56c99038276c17d4ca21d6161a458fc6, type: 2}
+  prefab: {fileID: 6836524337924469086, guid: 98ef4c6d6b72cec4c879cc70fe3b30e7, type: 3}
   report: Not run
 --- !u!1 &1887074395
 GameObject:
@@ -2391,3 +2523,5 @@ SceneRoots:
   - {fileID: 1697413792}
   - {fileID: 950048874}
   - {fileID: 1806561606}
+  - {fileID: 936505048}
+  - {fileID: 613131313}

@@ -89,9 +89,9 @@ public class TowerDefinitionTest : MonoBehaviour
             yield return new WaitForSeconds(0.9f);
             Check(!towerA.TryPreviewShot() && towerA.ReadSnapshot().PreviewShots == 0 &&
                 towerA.ReadSnapshot().RemainingCooldown == 0f, "No preview shot or cooldown before Activate");
-            Check(!towerA.TryValidateForActivation(out string projectileError) &&
-                projectileError.Contains("projectilePrefab") && !towerA.Activate(),
-                "Real activation rejects missing projectile data (explicit preview required)");
+            Check(towerA.TryValidateForActivation(out _) && towerA.Activate(),
+                "Configured projectile allows real activation");
+            towerA.Suspend();
             Check(towerA.Activate(true) && towerA.TryPreviewShot() && !towerB.TryPreviewShot(),
                 "Explicit preview activates only A; B stays suspended");
             float firstCooldown = towerA.ReadSnapshot().RemainingCooldown;

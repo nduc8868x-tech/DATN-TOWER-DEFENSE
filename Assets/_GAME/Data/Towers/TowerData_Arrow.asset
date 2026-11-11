@@ -20,13 +20,13 @@ MonoBehaviour:
     cooldown: 0.8
     range: 3
     projectileSpeed: 8
-    projectilePrefab: {fileID: 0}
+    projectilePrefab: {fileID: 8968876398508882181, guid: 98ef4c6d6b72cec4c879cc70fe3b30e7, type: 3}
     cost: 100
     bodySprite: {fileID: 21300000, guid: 44d88b145194e694ba598854e571c3c5, type: 3}
   - damage: 28
     cooldown: 0.65
     range: 3
     projectileSpeed: 8
-    projectilePrefab: {fileID: 0}
+    projectilePrefab: {fileID: 8968876398508882181, guid: 98ef4c6d6b72cec4c879cc70fe3b30e7, type: 3}
     cost: 100
     bodySprite: {fileID: 21300000, guid: 116986e55b5c1ff4eb3b185455c4aead, type: 3}

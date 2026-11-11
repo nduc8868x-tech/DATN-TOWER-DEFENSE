@@ -36,7 +36,7 @@ public class Tower : MonoBehaviour
             Target = target; GameTime = Time.time; Origin = tower.muzzle.position;
         }
     }
-    // Projectile creation can subscribe here in session 10. No damage is applied here.
+    // Observation only: Tower itself creates exactly one projectile before this event.
     public event System.Action<ShotRecord> ShotFired;
     private static readonly int PreviewShot = Animator.StringToHash("PreviewShot");
 
@@ -49,7 +49,7 @@ public class Tower : MonoBehaviour
     public readonly struct RuntimeSnapshot
     {
         public readonly int Level, Damage, Cost, PreviewShots;
-        public readonly float Cooldown, Range, ProjectileSpeed, RemainingCooldown;
+        public readonly float Cooldown, Range, ProjectileSpeed, RemainingCooldown, Radius;
         public readonly bool Initialized, Active;
         public RuntimeSnapshot(Tower tower)
         {
@@ -60,6 +60,7 @@ public class Tower : MonoBehaviour
             Cooldown = tower.stats.cooldown;
             Range = tower.stats.range;
             ProjectileSpeed = tower.stats.projectileSpeed;
+            Radius = tower.stats.radius;
             RemainingCooldown = tower.remainingCooldown;
             Initialized = tower.initialized;
             Active = tower.IsActive;
@@ -70,6 +71,44 @@ public class Tower : MonoBehaviour
     }
 
     public RuntimeSnapshot ReadSnapshot() => new RuntimeSnapshot(this);
+
+    internal int SessionId => sessionId;
+    internal bool HasCurrentSession => initialized && resolver != null && resolver.SessionId == sessionId;
+
+    // Also used on the prefab before Factory instantiates anything.
+    public bool TryValidateCombatLevel(TowerData definition, int requestedLevel, out TowerLevelStats selected, out string error)
+    {
+        selected = default;
+        error = "Missing tower data.";
+        if (definition == null || !definition.TryValidate(out error) ||
+            !definition.TryGetLevel(requestedLevel, out selected, out error)) return false;
+        if (!enabled || !gameObject.activeSelf || muzzle == null || !muzzle.IsChildOf(transform) ||
+            body == null || !body.transform.IsChildOf(transform) || selected.bodySprite == null || selected.damage <= 0)
+        { error = "Tower requires enabled prefab, child Muzzle/body, sprite and positive damage."; return false; }
+        var projectile = selected.projectilePrefab == null ? null : selected.projectilePrefab.GetComponent<Projectile>();
+        if (projectile == null) { error = "Missing Projectile prefab."; return false; }
+        if (!projectile.TryValidate(out error)) return false;
+        if (projectile is Projectile_Rock && (selected.radius <= 0f ||
+            (selected.range + Vector3.Distance(transform.position, muzzle.position)) / selected.projectileSpeed >= projectile.Lifetime))
+        { error = "Rock requires positive radius and lifetime exceeding maximum range flight from Muzzle."; return false; }
+        return true;
+    }
+
+    public bool TryApplyLevel(int nextLevel, out string error)
+    {
+        error = "Upgrade requires a current instance and the next level.";
+        if (!HasCurrentSession || nextLevel != level + 1 ||
+            !stats.TryValidate(out _) || !TryValidateCombatLevel(data, nextLevel, out var next, out error)) return false;
+        float nextRemaining = Mathf.Clamp01(remainingCooldown / stats.cooldown) * next.cooldown;
+        // Commit only after every check; active/preview state and existing ShotContexts stay unchanged.
+        stats = next;
+        level = nextLevel;
+        remainingCooldown = nextRemaining;
+        body.sprite = next.bodySprite;
+        targeting.Reset();
+        error = string.Empty;
+        return true;
+    }
 
     private void Awake()
     {
@@ -120,8 +159,10 @@ public class Tower : MonoBehaviour
         if (!initialized || !isActiveAndEnabled || resolver == null || registry == null ||
             resolver.SessionId != sessionId || muzzle == null)
             error = $"{name}: tower is not initialized in the current session, enabled, or has no Muzzle.";
-        else if (!preview && stats.projectilePrefab == null)
-            error = $"{name}: projectilePrefab is missing. Session 8 supports explicit preview only.";
+        else if (!preview && (stats.projectilePrefab == null || stats.projectilePrefab.GetComponent<Projectile>() == null))
+            error = $"{name}: projectilePrefab must have a Projectile component.";
+        else if (!preview && !stats.projectilePrefab.GetComponent<Projectile>().TryValidate(out error))
+            return false;
         else
             error = string.Empty;
         return error.Length == 0;
@@ -133,16 +174,16 @@ public class Tower : MonoBehaviour
         if (!TryValidateForActivation(out _, preview))
             return false;
         previewOnly = preview;
-        automaticTargeting = false;
+        automaticTargeting = !preview;
         activeCombat = true;
         return true;
     }
 
     public void Suspend() => activeCombat = false;
 
-    public bool ActivateTargeting()
+    public bool ActivateTargeting(bool preview = false)
     {
-        if (!Activate(true)) return false;
+        if (!Activate(preview)) return false;
         automaticTargeting = true;
         targeting.Reset();
         return true;
@@ -158,12 +199,37 @@ public class Tower : MonoBehaviour
         var target = targeting.Tick(registry, sessionId, transform.position, stats.range, Time.deltaTime);
         if (remainingCooldown > 0f || muzzle == null ||
             !TowerTargeting.IsValid(target, sessionId, transform.position, stats.range)) return;
+        if (!previewOnly)
+        {
+            if (!TryValidateForActivation(out _)) { Suspend(); return; }
+            var instance = Instantiate(stats.projectilePrefab, muzzle.position, Quaternion.identity);
+            var projectile = instance.GetComponent<Projectile>();
+            bool launched;
+            if (projectile is Projectile_Rock rock)
+            {
+                // Exactly one position read at launch; rock never keeps a target reference.
+                Vector3 impactPosition = target.Position;
+                impactPosition.z = muzzle.position.z;
+                launched = rock.Initialize(new RockShotContext(impactPosition, sessionId, stats.damage,
+                    stats.radius, stats.projectileSpeed, projectile.Lifetime), resolver);
+            }
+            else
+            {
+                var context = new ShotContext(target, sessionId, stats.damage, stats.projectileSpeed, projectile.Lifetime);
+                launched = projectile.Initialize(context, resolver);
+            }
+            if (!launched)
+            { Destroy(instance); Suspend(); return; }
+        }
         remainingCooldown = stats.cooldown;
         shotId++;
         var shot = new ShotRecord(this, target);
         if (animator != null) animator.SetTrigger(PreviewShot);
-        Debug.DrawLine(muzzle.position, target.Position, Color.yellow, 0.15f);
-        Debug.Log($"SHOT {shot.ShotId} | tower {shot.TowerId} | target {target.Identity} | gameTime {shot.GameTime:F4}", this);
+        if (previewOnly)
+        {
+            Debug.DrawLine(muzzle.position, target.Position, Color.yellow, 0.15f);
+            Debug.Log($"SHOT {shot.ShotId} | tower {shot.TowerId} | target {target.Identity} | gameTime {shot.GameTime:F4}", this);
+        }
         ShotFired?.Invoke(shot);
     }
 

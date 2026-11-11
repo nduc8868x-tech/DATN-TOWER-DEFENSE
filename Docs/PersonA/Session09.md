@@ -1,5 +1,7 @@
 # Buổi 9 — chọn mục tiêu và nhịp bắn
 
+**Cập nhật buổi 10:** `ActivateTargeting()` nay tạo projectile thật. Khi chạy lại bộ đo buổi 9, dùng `ActivateTargeting(true)` để chọn preview tường minh; TowerAttackTest đã được cập nhật. Các kết quả bên dưới là bằng chứng lịch sử của buổi 9.
+
 Nguồn: mục Buổi 09 trong Huong_dan_24_buoi_nguoi_A_DATN.docx. Không có AGENTS.md trong project/các thư mục cha đã kiểm tra. Giữ nguyên Shared và API người B. Catalog hiện chỉ có normal; dùng hai normal với tiến độ khác nhau thay cho normal/runner trong ví dụ tài liệu.
 
 ## Thiết kế

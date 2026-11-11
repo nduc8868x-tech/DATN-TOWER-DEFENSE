@@ -1,0 +1,25 @@
+Session 13 verification (isolated fixtures; run no other tests concurrently)
+PASS Factory I / snapshot: rock, damage30 cooldown2 radius1 range3 speed4 cost140 next140
+PASS Factory II / snapshot: damage50 cooldown1.8 radius1.25 cost140 max level
+PASS Create without Activate does not fire
+PASS Activate succeeds
+PASS Consumed before callback; arrival exactly at impactPosition (no overshoot)
+PASS Moving target: fixed center / radius1, one explosion, HP60 (visual circle still needs visual inspection)
+PASS Target moved outside range without cancelling old rock
+PASS Level I firing interval 2.0002s expected2
+PASS Target dead after shot: flying rock is not cancelled
+PASS Dead target: one explosion at saved point
+PASS Disabled alive target: fixed-point explosion still occurs, no damage
+PASS Pause 0.6 real seconds freezes position and lifetime
+PASS Resume reaches destination without damage
+PASS Upgrade while flying preserves complete old snapshot
+PASS New shot after upgrade snapshots damage50/radius1.25
+PASS Level II firing interval 1.8030s expected1.8
+PASS Suspend prevents new shots; radius1.25 rock completes
+PASS Dispose tower does not destroy in-flight rock
+PASS Lifetime fixture initialized
+PASS Lifetime expiry cancels without explosion callback
+PASS Paused cleanup/restart removes rocks AND arrows; no old explosion callback
+PASS No late callback in new session
+PASS Arrow regression: factory + shot still deals16 (60 -> 44)
+RESULT 23/23; failures=0

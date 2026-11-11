@@ -14,9 +14,20 @@ public class CombatResolver : MonoBehaviour
     public int SessionId => sessionId;
     private int nextSpawnId;
     private int lastResolvedFrame = -1;
+    private readonly HashSet<Projectile> projectiles = new HashSet<Projectile>();
+    public int ProjectileCount => projectiles.Count;
+    public void RegisterProjectile(Projectile projectile) => projectiles.Add(projectile);
+    public void UnregisterProjectile(Projectile projectile) => projectiles.Remove(projectile);
+    public void CleanupProjectiles(int session)
+    {
+        foreach (var projectile in new List<Projectile>(projectiles))
+            if (projectile != null && projectile.SessionId == session) projectile.Cancel();
+    }
+    private void OnDestroy() => CleanupProjectiles(sessionId);
 
     public void BeginSession()
     {
+        CleanupProjectiles(sessionId);
         sessionId = ++nextSessionId;
         nextSpawnId = 0;
         hits.Clear();

@@ -10,6 +10,7 @@ public struct TowerLevelStats
     [Min(0.01f)] public float range;
     [Min(0.01f)] public float projectileSpeed;
     public GameObject projectilePrefab;
+    [Min(0)] public float radius; // Zero for direct-hit arrows.
     [Min(0)] public int cost;
     public Sprite bodySprite;
 
@@ -17,7 +18,7 @@ public struct TowerLevelStats
     {
         error = string.Empty;
         if (damage < 0 || cost < 0 || !Positive(cooldown) ||
-            !Positive(range) || !Positive(projectileSpeed))
+            !Positive(range) || !Positive(projectileSpeed) || radius < 0f || float.IsNaN(radius) || float.IsInfinity(radius))
             error = "Damage/cost must be non-negative; cooldown/range/projectileSpeed must be finite and positive.";
         return error.Length == 0;
     }

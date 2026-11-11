@@ -62,7 +62,7 @@ public class TowerAttackTest : MonoBehaviour
             second.Target.transform.SetAsFirstSibling();
             yield return new WaitForSeconds(0.3f);
             Check(shotsA.Count == 0 && shotsB.Count == 0, "Initialize: no shots before Activate");
-            towerA.ActivateTargeting();
+            towerA.ActivateTargeting(true);
             yield return new WaitForSeconds(0.2f);
             Check(towerA.CurrentTarget.Identity.Equals(second.Identity) && shotsA.Count == 1,
                 "Highest Progress wins regardless of Hierarchy");
@@ -96,14 +96,14 @@ public class TowerAttackTest : MonoBehaviour
             Check(shotsA.Count == suspended, "Suspend stops shots");
 
             Initialize(1); shotsA.Clear(); shotsB.Clear();
-            towerA.ActivateTargeting(); yield return new WaitForSeconds(0.25f);
-            towerB.ActivateTargeting(); yield return new WaitForSeconds(0.1f);
+            towerA.ActivateTargeting(true); yield return new WaitForSeconds(0.25f);
+            towerB.ActivateTargeting(true); yield return new WaitForSeconds(0.1f);
             Check(shotsA.Count == 1 && shotsB.Count == 1 &&
                 towerA.ReadSnapshot().RemainingCooldown < towerB.ReadSnapshot().RemainingCooldown,
                 "Two level-I instances sharing data have independent cooldowns");
 
             Initialize(); shotsA.Clear(); shotsB.Clear();
-            towerA.ActivateTargeting(); towerB.ActivateTargeting();
+            towerA.ActivateTargeting(true); towerB.ActivateTargeting(true);
             yield return new WaitForSeconds(10.5f);
             CheckCadence(shotsA, 0.8f, "Level I"); CheckCadence(shotsB, 0.65f, "Level II");
             Check(first.Target.GetComponent<EnemyHealth>().CurrentHP == 60, "Shots cause no real damage");
