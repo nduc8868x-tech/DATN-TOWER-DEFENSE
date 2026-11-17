@@ -39,7 +39,7 @@ public class FlowBootstrapper : MonoBehaviour
     }
     public void StartNewSession()
     {
-        if (restarting || (!isWired && !ResolveDependencies())) return;
+        if (restarting || ((!isWired || enemySpawnService == null || towerFactory == null) && !ResolveDependencies())) return;
         restarting = true;
         try
         {

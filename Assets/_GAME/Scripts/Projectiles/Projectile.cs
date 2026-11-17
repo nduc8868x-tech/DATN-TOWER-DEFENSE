@@ -59,11 +59,14 @@ public class Projectile : MonoBehaviour
             transform.position = destination;
             HitRequests++;
             resolver.RequestHit(new HitRequest(context.Target.Target, context.Target.Identity, context.Damage));
-            Retire();
+            try { OnHit(context, resolver); }
+            finally { Retire(); }
             return;
         }
         transform.position = Vector3.MoveTowards(transform.position, destination, step);
     }
+
+    protected virtual void OnHit(ShotContext shot, CombatResolver combatResolver) { }
 
     public virtual void Cancel() { consumed = true; Retire(); }
     private void Retire()

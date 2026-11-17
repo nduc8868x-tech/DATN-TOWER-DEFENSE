@@ -13,6 +13,8 @@ public struct TowerLevelStats
     [Min(0)] public float radius; // Zero for direct-hit arrows.
     [Min(0)] public int cost;
     public Sprite bodySprite;
+    public Sprite launchRearSprite;
+    public Sprite launchFrontSprite;
 
     public bool TryValidate(out string error)
     {

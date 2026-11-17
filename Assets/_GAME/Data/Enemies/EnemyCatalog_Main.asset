@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCatalog
   entries:
   - {fileID: 11400000, guid: b66abba399650de4ea7b64a8a9b06545, type: 2}
+  - {fileID: 11400000, guid: 7e1c0b214d9f42a2b862d44c0a07c507, type: 2}

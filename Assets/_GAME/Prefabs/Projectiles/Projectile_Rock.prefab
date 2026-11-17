@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: da1b5ee071ac4bd9bfa39c87e34c8329, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f6321569567f57548a7e543578f374d1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -106,3 +106,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Projectile_Rock
   lifetime: 3
   hitRadius: 0
+  arcHeight: 0.75
+  dust: {fileID: 21300000, guid: b929dcd2064f5c499076f20972a4d3b5, type: 3}
+  fragments:
+  - {fileID: 21300000, guid: 10d868acda4a5b63bffc8148d03e5b4d, type: 3}
+  - {fileID: 21300000, guid: 5f19dad80b735102ac55dd14bdc78b0d, type: 3}
+  - {fileID: 21300000, guid: de636ba84e9d5415a96c6f3d18aba6af, type: 3}
+  - {fileID: 21300000, guid: 2eac81ad80ce5b07b414936b1e6721d6, type: 3}
+  impactFrames:
+  - {fileID: 21300000, guid: ca39664ed07e3624291b308b9d878ddc, type: 3}
+  - {fileID: 21300000, guid: cb681a99b79bad043a07dfa6921cefdf, type: 3}
+  - {fileID: 21300000, guid: 61d3add3f746eee49bdac1c0d7688971, type: 3}
+  - {fileID: 21300000, guid: c7d69032749b9394c8df962175ca6d70, type: 3}
+  impactFrameDuration: 0.09

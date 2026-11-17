@@ -1,0 +1,172 @@
+# 1. THÁP LÍNH – BARRACKS TOWER
+
+## 1.1. Giới thiệu
+
+Tháp Lính là công trình phòng thủ hỗ trợ có khả năng triệu hồi các binh sĩ để chiến đấu trực tiếp với quân địch.
+
+Khác với các tháp Cung, Đá và Phép, công trình này không tự động bắn đạn. Thay vào đó, nó tạo ra một đội lính tại vị trí tập kết (Rally Point) trên đường di chuyển của quái vật.
+
+Lính có thể tấn công cận chiến và ngăn quái tiếp tục di chuyển trong một khoảng thời gian.
+
+Vai trò chính Chặn đường, kéo dài thời gian giao tranh và bảo vệ tuyến phòng thủ cuối cùng.
+
+## 1.2. Bảng thông số
+
+ Thuộc tính  Cấp 1  Cấp 2 
+---------
+ Giá xây dựng  160 vàng  — 
+ Giá nâng cấp  —  180 vàng 
+ Số lính tối đa  2  3 
+ Máu mỗi lính (HP)  90  130 
+ Sát thương mỗi lính  8  12 
+ Thời gian giữa các đòn  1,1 giây  1,0 giây 
+ DPS mỗi lính  7,27  12 
+ Tổng DPS tối đa  14,55  36 
+ Số quái chặn tối đa  2  3 
+ Thời gian hồi sinh  12 giây  9 giây 
+ Phạm vi tập kết  1,2 đơn vị  1,4 đơn vị 
+ Tổng vốn đầu tư  160 vàng  340 vàng 
+ Giá bán (70%)  112 vàng  238 vàng 
+
+Đây là các thông số đề xuất từ thiết kế BG2 trước đó, không phải chỉ số đã có trong GDD gốc. DPS tối đa giả định tất cả lính đều đang đánh trúng mục tiêu.
+
+## 1.3. Cơ chế chiến đấu cấp 1
+
+Khi người chơi mua Tháp Lính cấp 1
+
+- Công trình triệu hồi 2 lính bộ binh.
+- Mỗi lính có 90 HP.
+- Mỗi đòn đánh gây 8 sát thương.
+- Thời gian giữa hai đòn là 1,1 giây.
+- Mỗi lính có thể chặn tối đa 1 quái vật.
+- Khi lính chết, lính mới sẽ xuất hiện sau 12 giây.
+
+Ví dụ thực tế
+
+Có 4 quái Normal đang tiến về phía cổng.
+
+Hai lính được triệu hồi sẽ chặn tối đa 2 quái. Hai quái còn lại tiếp tục di chuyển nếu không bị chặn bởi công trình hoặc lính khác.
+
+Khi một lính bị tiêu diệt, quái đang bị giữ sẽ tiếp tục di chuyển về phía cổng.
+
+## 1.4. Cơ chế chiến đấu cấp 2
+
+Khi nâng cấp từ cấp 1 lên cấp 2, tháp thay đổi ngoại hình và tăng sức mạnh đội quân.
+
+Các thay đổi
+
+- Số lính tăng từ 2 lên 3.
+- Máu mỗi lính tăng từ 90 lên 130.
+- Sát thương tăng từ 8 lên 12.
+- Nhịp đánh tăng lên 1 đòngiây.
+- Thời gian hồi sinh giảm từ 12 xuống 9 giây.
+- Có thể chặn đồng thời tối đa 3 quái.
+
+Ví dụ
+
+Một nhóm 5 quái Normal tiến vào khu vực tập kết.
+
+Ba lính có thể giữ chân tối đa 3 quái, trong khi 2 quái còn lại tiếp tục di chuyển.
+
+Nhờ đó, Tháp Cung và các tháp Phép có thể tập trung tấn công những mục tiêu đang bị chặn.
+
+## 1.5. Cơ chế hồi sinh lính
+
+Mỗi lính có một vị trí triệu hồi riêng, gọi là Soldier Slot.
+
+Cấp 1
+
+- Soldier Slot 1 12 giây hồi sinh.
+- Soldier Slot 2 12 giây hồi sinh.
+
+Cấp 2
+
+- Soldier Slot 1 9 giây hồi sinh.
+- Soldier Slot 2 9 giây hồi sinh.
+- Soldier Slot 3 9 giây hồi sinh.
+
+Thời gian hồi sinh bắt đầu khi từng lính chết.
+
+Nếu cả ba lính cấp 2 bị tiêu diệt cùng lúc, cả ba slot sẽ hoàn thành hồi sinh sau 9 giây. Có thể tạo lính lệch nhau 0,25 giây để tránh hình ảnh chồng lên nhau.
+
+Khi game Pause, đồng hồ hồi sinh cũng phải tạm dừng.
+
+## 1.6. Quy tắc chặn quái
+
+1. Mỗi lính chỉ được chặn tối đa 1 quái tại cùng thời điểm.
+2. Quái bị chặn tạm dừng di chuyển nhưng vẫn có thể tấn công và nhận sát thương.
+3. Lính ưu tiên quái đang tiến gần lối thoát nhất trong phạm vi tập kết.
+4. Lính không được đuổi quái quá xa Rally Point.
+5. Nếu lính chết, quái đang bị chặn tiếp tục di chuyển từ vị trí hiện tại.
+6. Quái bay hoặc quái đặc biệt có thể được thiết kế miễn nhiễm cơ chế chặn trong các bản mở rộng.
+7. Boss không được phép bị giữ đứng vô hạn bằng lính.
+
+## 1.7. Logic nâng cấp
+
+Khi người chơi nâng Tháp Lính
+
+1. Kiểm tra công trình đang ở cấp 1.
+2. Kiểm tra người chơi có ít nhất 180 vàng.
+3. Trừ 180 vàng.
+4. Thay sprite công trình từ cấp 1 sang cấp 2.
+5. Tăng giới hạn từ 2 lên 3 lính.
+6. Cập nhật chỉ số lính hiện có.
+7. Thêm Soldier Slot thứ ba.
+8. Giảm thời gian hồi sinh xuống 9 giây.
+9. Cập nhật giá bán thành 238 vàng.
+10. Khóa nút Upgrade vì đã đạt cấp tối đa.
+
+Việc nâng cấp không được tạo trùng lính hoặc làm hồi sinh miễn phí toàn bộ lính đã chết.
+
+## 1.8. Logic bán tháp
+
+Bán cấp 1
+
+160 × 70% = 112 vàng.
+
+Bán cấp 2
+
+(160 + 180) × 70% = 238 vàng.
+
+Khi người chơi bán tháp
+
+- Hoàn tiền theo cấp hiện tại.
+- Xóa công trình.
+- Xóa toàn bộ lính đang tồn tại.
+- Hủy tất cả bộ đếm hồi sinh.
+- Giải phóng những quái đang bị lính chặn.
+- Trả lại BuildPoint để xây công trình khác.
+
+## 1.9. Điểm mạnh
+
+- Có thể ngăn quái tiến về phía căn cứ.
+- Hữu ích khi quái sắp vượt qua tuyến phòng thủ.
+- Tạo thời gian cho tháp Cung, Hỏa, Băng và Sét gây thêm sát thương.
+- Có khả năng tự bổ sung quân sau khi bị tiêu diệt.
+- Khuyến khích người chơi bố trí phòng thủ nhiều lớp.
+
+## 1.10. Điểm yếu
+
+- Lính có thể bị tiêu diệt bởi quái mạnh.
+- Không gây sát thương từ xa.
+- Không hiệu quả khi số lượng quái vượt quá khả năng chặn.
+- Boss có thể vượt qua tuyến lính.
+- Nếu xây quá sớm hoặc đặt Rally Point sai vị trí, hiệu quả kinh tế thấp.
+
+## 1.11. Vị trí đề xuất trên BG2
+
+Tháp Lính được đề xuất xây tại P4, gần tuyến đường thoát chung.
+
+Lính được đặt tại điểm tập kết trên đường đi trước cổng.
+
+Vị trí này có tác dụng giữ những quái đã vượt qua hệ thống Cung, Đá và Phép ở phía trước.
+
+Đây là phương án phòng thủ cuối cùng, không thay thế cho các tháp gây sát thương chính.
+
+## 1.12. Kết luận
+
+Tháp Lính bổ sung cơ chế chiến đấu cận chiến và chặn đường cho hệ thống Tower Defense.
+
+Công trình tạo thêm lựa chọn chiến thuật so với những tháp chỉ gây sát thương từ xa.
+
+Cơ chế hồi sinh có giới hạn cũng giúp tạo sự hồi hộp người chơi phải tính toán liệu đội lính có giữ được quái cho tới khi các công trình khác tiêu diệt chúng hay không.

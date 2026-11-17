@@ -8,13 +8,38 @@ public class BuildPoint : MonoBehaviour
     [SerializeField] private Transform buildAnchor;
     [SerializeField] private SpriteRenderer visualRenderer;
 
+    [Tooltip("Không bắt buộc. Gán nếu muốn chỉnh riêng tâm menu.")]
+    [SerializeField] private Transform menuAnchor;
+
     [Header("Colors")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color selectedColor = Color.yellow;
-    [SerializeField] private Color occupiedColor = new Color(0.7f, 0.9f, 1f, 1f);
+    [SerializeField] private Color occupiedColor =
+        new Color(0.7f, 0.9f, 1f, 1f);
 
     public string PointId => pointId;
-    public Vector3 AnchorPosition => buildAnchor != null ? buildAnchor.position : transform.position;
+
+    // Vị trí dựng tháp.
+    public Vector3 AnchorPosition =>
+        buildAnchor != null
+            ? buildAnchor.position
+            : transform.position;
+
+    // Vị trí mở menu, độc lập với vị trí dựng tháp.
+    public Vector3 MenuPosition
+    {
+        get
+        {
+            if (menuAnchor != null)
+                return menuAnchor.position;
+
+            if (visualRenderer != null)
+                return visualRenderer.bounds.center;
+
+            return transform.position;
+        }
+    }
+
     public TowerHandle CurrentTowerHandle { get; private set; }
     public string CurrentTowerId { get; private set; }
     public int CurrentLevel { get; private set; }
@@ -22,7 +47,8 @@ public class BuildPoint : MonoBehaviour
     public bool TransactionInProgress { get; private set; }
 
     public bool IsOccupied =>
-        CurrentTowerHandle != null && !CurrentTowerHandle.ReadSnapshot().IsDisposed;
+        CurrentTowerHandle != null &&
+        !CurrentTowerHandle.ReadSnapshot().IsDisposed;
 
     private bool isSelected;
     private static Sprite fallbackSquareSprite;
@@ -43,15 +69,27 @@ public class BuildPoint : MonoBehaviour
         pointId = id;
     }
 
-    public void BeginTransaction() => TransactionInProgress = true;
-    public void EndTransaction() => TransactionInProgress = false;
+    public void BeginTransaction()
+    {
+        TransactionInProgress = true;
+    }
 
-    public void SetOccupied(TowerHandle handle, string towerId, int level, int cost)
+    public void EndTransaction()
+    {
+        TransactionInProgress = false;
+    }
+
+    public void SetOccupied(
+        TowerHandle handle,
+        string towerId,
+        int level,
+        int cost)
     {
         CurrentTowerHandle = handle;
         CurrentTowerId = towerId;
         CurrentLevel = level;
         TotalInvested = Mathf.Max(0, cost);
+
         RefreshColor();
     }
 
@@ -59,6 +97,7 @@ public class BuildPoint : MonoBehaviour
     {
         TotalInvested += Mathf.Max(0, upgradeCost);
         CurrentLevel = newLevel;
+
         RefreshColor();
     }
 
@@ -68,6 +107,7 @@ public class BuildPoint : MonoBehaviour
         CurrentTowerId = null;
         CurrentLevel = 0;
         TotalInvested = 0;
+
         RefreshColor();
     }
 
@@ -94,12 +134,13 @@ public class BuildPoint : MonoBehaviour
     {
         if (fallbackSquareSprite == null)
         {
-            Texture2D tex = Texture2D.whiteTexture;
+            Texture2D texture = Texture2D.whiteTexture;
+
             fallbackSquareSprite = Sprite.Create(
-                tex,
-                new Rect(0f, 0f, tex.width, tex.height),
+                texture,
+                new Rect(0f, 0f, texture.width, texture.height),
                 new Vector2(0.5f, 0.5f),
-                tex.width
+                texture.width
             );
         }
 

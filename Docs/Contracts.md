@@ -1,6 +1,6 @@
 ﻿# Gameplay contracts — Level01 integration
 
-Updated 2026-11-12. Applies to A, B, real providers and sandbox callers.
+Updated 2026-11-16. Applies to real providers and sandbox callers. Final Level01 configuration is in [Level01.md](Level01.md); it supersedes the old integration test balance below.
 
 ## Ownership and canonical types
 
@@ -10,12 +10,12 @@ Updated 2026-11-12. Applies to A, B, real providers and sandbox callers.
 - One EnemyResolved in Shared carries Identity(SessionId, SpawnId), WaveId, State, Bounty and LeakDamage. SessionId/SpawnId/Reason and the integer constructor are compatibility views for B's sandbox; there is no second result queue or payload implementation.
 - One TowerHandle and TowerSnapshot live under Scripts/Towers. Duplicate Shared versions were removed; A's original GUIDs were retained. Handle exposes bool Activate/Suspend/TryApplyLevel, idempotent Dispose, value ReadSnapshot() and Try-style ReadSnapshot(out snapshot). FakeTowerFactory derives a sandbox handle from this contract.
 - IEnemySpawnService.TrySpawn(EnemySpawnRequest, out EnemyHandle), bool BeginMovement, CleanupSession, Resolved and LastError are common to real and fake services. A's positional TrySpawn overload remains for existing CombatSandbox tools.
-- Canonical tower IDs follow the catalog: arrow and rock. No stone alias in callers. Rock progress/assets remain; BuildManager opens only arrow for purchase. Magic is not offered.
+- Canonical tower IDs follow the catalog: arrow and rock. No stone alias in callers. Arrow opens initially; rock opens only after CompletedWaves >= 3, enforced by BuildManager and HUD. Magic is not offered.
 
 ## Data and transactions
 
 - TowerCatalog -> TowerData -> one-based level stats is the only purchase/upgrade price source, including HUD and FlowSandbox labels. Arrow currently has cost 100 at I and cost 100 for the upgrade to II; this matches the A/B guide. No arrow combat/data values were changed during integration.
-- Start 240 gold and 20 lives. Normal data: 60 HP, bounty 8, leak 1. Three integration waves are data assets with 5 / 7 / 10 normal and 1.5 seconds interval. The user's requested 7 overrides the older general guide's 8. These are test data, not final balance.
+- Start 240 gold and 20 lives. Normal: HP60/speed1.2/armor0/bounty8/leak1; runner: HP40/speed1.9/armor0/bounty7/leak1. Six final waves total 5/8/10/12/14/18. WaveData groups store enemyId, routeId, count, interval, delayBeforeGroup; no scene references. Groups run sequentially without waiting for deaths; delay starts at the preceding group's final spawn.
 - TryCreate returns an initialized, suspended tower. BuildManager locks the point/manager, creates, silently reserves gold, commits occupancy/investment, then Activate. On false creation/activation it suspends/disposes the candidate, clears occupancy and cancels the money reservation. UI receives transaction events only after a final outcome.
 - Upgrade reserves gold BEFORE TryApplyLevel. Real TryApplyLevel validates the next level and all combat references before changing level/stats/sprite/cooldown. On false, cancel reservation; no attempt to downgrade/rollback using TryApplyLevel(oldLevel). There is no fallible spend after successful stat mutation.
 - Each synchronous transaction locks against reentry/double purchase. Completed purchase occupies the point, so the next request fails without a second charge.
@@ -46,6 +46,6 @@ Updated 2026-11-12. Applies to A, B, real providers and sandbox callers.
 
 - Saved LevelHUD Canvas reads GetSnapshot immediately on bind, then SnapshotChanged. It stores no mutable gold/lives balance. Purchase/upgrade labels query BuildManager's TowerData prices; sale label derives from tracked investment.
 - One InputSystemUIInputModule EventSystem. BuildInputController checks the EventSystem's current pointer and performs a fresh RaycastAll at the clicked position before world picking, preventing same-frame UI click-through.
-- Actual sprites from the existing UI kit mark eight points. Screen Space Overlay HUD contains gold/lives/wave/alive, Start, Pause/Resume, Restart, selection/buy/upgrade/sell and a modal result panel.
+- Exactly five user-positioned points retain existing sprites/transforms. Screen Space Overlay HUD contains gold/lives/wave/alive, manual Start, Pause/Resume, Restart, selection/buy/upgrade/sell and a modal result panel. No nonfunctional menu-scene button is provided.
 
 Buy and Upgrade occupy separate screen regions. A rapid second click at the purchase position must hit menu background, not initiate an upgrade; both the service duplicate guard and UI raycast transition were verified.

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60d23f499a8612409286a030906d88a, type: 3}
+  m_Name: EnemyCatalog_Monsters
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCatalog
+  entries:
+  - {fileID: 11400000, guid: 7dad160856f3a94429f1482f42ad1426, type: 2}
+  - {fileID: 11400000, guid: 72e3e033494b27449825386c68be5246, type: 2}
+  - {fileID: 11400000, guid: 63e3ad9bfa8fc9f4aa1ec0b1e94a2371, type: 2}
+  - {fileID: 11400000, guid: ee8db6d83982bde4ab3b519b73fb05b4, type: 2}
+  - {fileID: 11400000, guid: ad9c0248da4b298438d3ce2377dc7461, type: 2}
+  - {fileID: 11400000, guid: ea0864a15b8e0904ab120930cfcd4304, type: 2}
+  - {fileID: 11400000, guid: 6b8fc148b7821164dbb597a7302f1119, type: 2}
+  - {fileID: 11400000, guid: b4dc09d5040fcb04aa570741096ebfac, type: 2}
+  - {fileID: 11400000, guid: 5702a95d11db75b4f954ce77f1c8d711, type: 2}
+  - {fileID: 11400000, guid: ee723de018e40c84bb8b6418d49c3e12, type: 2}

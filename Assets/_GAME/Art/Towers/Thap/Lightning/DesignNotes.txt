@@ -1,0 +1,136 @@
+# 1. THÁP SÉT – LIGHTNING TOWER
+
+## 1.1. Giới thiệu
+
+Tháp Sét là công trình phòng thủ sử dụng năng lượng điện để tấn công nhiều mục tiêu liên tiếp.
+
+Khi phát hiện quái vật trong tầm bắn, tháp phóng ra một tia sét gây sát thương lên mục tiêu đầu tiên. Sau đó, tia sét có thể truyền sang những quái vật khác đang đứng gần mục tiêu bị tấn công.
+
+Khác với Tháp Đá gây sát thương trong một vùng nổ, Tháp Sét có khả năng kết nối nhiều mục tiêu bằng các tia điện liên tiếp.
+
+Vai trò chính Gây sát thương đa mục tiêu, đặc biệt hiệu quả khi các quái vật di chuyển thành từng nhóm.
+
+## 1.2. Bảng thông số
+
+ Thuộc tính  Cấp 1  Cấp 2 
+---------
+ Giá xây dựng  120 vàng  — 
+ Giá nâng cấp  —  160 vàng 
+ Sát thương mục tiêu đầu  18  32 
+ Thời gian giữa các đòn  1,3 giây  1,1 giây 
+ Tầm bắn  3,2 đơn vị  3,5 đơn vị 
+ Số mục tiêu tối đa  2  3 
+ Số lần sét truyền tiếp  1  2 
+ Bán kính truyền sét  1,3 đơn vị  1,5 đơn vị 
+ Sát thương sau mỗi lần truyền  60% đòn trước  55% đòn trước 
+ Tổng vốn đầu tư  120 vàng  280 vàng 
+ Giá bán (70%)  84 vàng  196 vàng 
+
+Lưu ý Đây là bộ thông số đề xuất mới cho Tháp Sét, chưa có trong GDD gốc và cần cân bằng bằng playtest trên bản đồ Unity.
+
+## 1.3. Cơ chế chiến đấu
+
+### Cấp 1 – Lightning Tower
+
+Khi quái vật tiến vào phạm vi 3,2 đơn vị, tháp tự động chọn mục tiêu và phóng tia sét.
+
+Tia sét gây 18 sát thương lên quái đầu tiên.
+
+Nếu có một quái khác trong bán kính 1,3 đơn vị tính từ mục tiêu đầu tiên, tia sét tiếp tục truyền sang quái thứ hai.
+
+Sát thương lên quái thứ hai bằng 60% sát thương của quái đầu tiên.
+
+Ví dụ
+
+- Quái A nhận 18 sát thương.
+- Quái B nhận 18 × 60% = 10,8 sát thương.
+- Tổng sát thương của một lần bắn lên hai mục tiêu là 28,8.
+
+Nếu không có quái thứ hai đủ gần, tia sét chỉ gây 18 sát thương cho mục tiêu đầu tiên.
+
+### Cấp 2 – Advanced Lightning Tower
+
+Khi được nâng cấp, ngoại hình của tháp thay đổi sang phiên bản lớn hơn, có nhiều chi tiết năng lượng xanh lam.
+
+Sức mạnh được cải thiện
+
+- Sát thương mục tiêu đầu tăng từ 18 lên 32.
+- Thời gian giữa hai đòn giảm từ 1,3 xuống 1,1 giây.
+- Số mục tiêu tối đa tăng từ 2 lên 3.
+- Bán kính truyền sét tăng từ 1,3 lên 1,5 đơn vị.
+- Sát thương mỗi lần truyền còn 55% đòn liền trước.
+
+Ví dụ khi có ba quái đứng gần nhau
+
+ Mục tiêu  Công thức  Sát thương 
+---------
+ Quái A  Đòn đầu  32 
+ Quái B  32 × 55%  17,6 
+ Quái C  17,6 × 55%  9,68 
+ Tổng   59,28 
+
+Giá trị trên là sát thương trước khi tính giáp và kháng hiệu ứng.
+
+Khi chỉ có một mục tiêu, Tháp Sét cấp 2 vẫn chỉ gây 32 sát thương mỗi đòn.
+
+## 1.4. Quy tắc lan truyền tia sét
+
+Để tránh lỗi khi lập trình và hạn chế việc tháp trở nên quá mạnh, cần áp dụng các quy tắc sau
+
+1. Mục tiêu đầu tiên phải nằm trong phạm vi tấn công của tháp.
+2. Các mục tiêu tiếp theo phải nằm trong bán kính truyền sét so với mục tiêu vừa bị đánh.
+3. Một quái vật không được nhận sát thương hai lần trong cùng một chuỗi sét.
+4. Mỗi lần truyền làm giảm sát thương theo tỷ lệ của cấp tháp.
+5. Tia sét chỉ truyền sang mục tiêu còn sống và có thể bị tấn công.
+6. Nếu không tìm thấy mục tiêu kế tiếp, chuỗi sét kết thúc.
+7. Boss chỉ chịu một lần sát thương trong mỗi chuỗi sét, không được nhận nhiều lần do tia sét quay ngược trở lại.
+
+## 1.5. Sát thương theo thời gian (DPS)
+
+DPS được tính bằng
+
+DPS = Tổng sát thương mỗi chuỗi  Thời gian giữa các đòn
+
+ Trường hợp  Cấp 1  Cấp 2 
+---------
+ Chỉ có 1 mục tiêu  13,85  29,09 
+ Đủ mục tiêu để truyền tối đa  22,15  53,89 
+ Số mục tiêu tương ứng  2  3 
+
+Đây là DPS lý thuyết, chưa tính giáp, thời gian bay của đạn, khả năng mất mục tiêu và số quái thực tế ở gần nhau.
+
+## 1.6. Điểm mạnh và điểm yếu
+
+### Điểm mạnh
+
+- Có khả năng tấn công nhiều quái trong một lần bắn.
+- Khắc chế tốt các nhóm quái nhỏ đi gần nhau.
+- Tấn công được nhiều quái dù chúng không cùng nằm trong một vùng nổ nhỏ.
+- Cấp 2 tăng rõ số mục tiêu và sát thương.
+- Phối hợp tốt với Tháp Băng và Tháp Lính.
+
+### Điểm yếu
+
+- Hiệu quả giảm đáng kể khi quái di chuyển cách xa nhau.
+- Không có khả năng làm chậm hoặc chặn quái.
+- Sát thương giảm sau mỗi lần truyền.
+- Không phải lựa chọn tối ưu để đánh một boss đơn độc.
+- Giá nâng cấp tương đối cao so với Tháp Băng.
+
+
+## 1.9. Logic nâng cấp trong Unity
+
+Khi người chơi chọn Upgrade
+
+1. Kiểm tra tháp đang ở cấp 1.
+2. Kiểm tra người chơi có ít nhất 160 vàng.
+3. Trừ 160 vàng khỏi EconomyManager.
+4. Thay sprite cấp 1 bằng sprite cấp 2.
+5. Tăng sát thương từ 18 lên 32.
+6. Giảm thời gian giữa các đòn từ 1,3 xuống 1,1 giây.
+7. Tăng tầm bắn từ 3,2 lên 3,5 đơn vị.
+8. Tăng số mục tiêu tối đa từ 2 lên 3.
+9. Tăng bán kính truyền sét từ 1,3 lên 1,5 đơn vị.
+10. Cập nhật giá bán thành 196 vàng.
+11. Khóa nút Upgrade vì tháp đã đạt cấp 2.
+

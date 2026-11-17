@@ -16,6 +16,9 @@ public class CombatResolver : MonoBehaviour
     private int nextSpawnId;
     private int lastResolvedFrame = -1;
     private readonly HashSet<Projectile> projectiles = new HashSet<Projectile>();
+    private readonly HashSet<RockImpactEffect> rockImpacts = new HashSet<RockImpactEffect>();
+    internal void RegisterRockImpact(RockImpactEffect effect) => rockImpacts.Add(effect);
+    internal void UnregisterRockImpact(RockImpactEffect effect) => rockImpacts.Remove(effect);
     public int ProjectileCount => projectiles.Count;
     public void RegisterProjectile(Projectile projectile) => projectiles.Add(projectile);
     public void UnregisterProjectile(Projectile projectile) => projectiles.Remove(projectile);
@@ -23,6 +26,9 @@ public class CombatResolver : MonoBehaviour
     {
         foreach (var projectile in new List<Projectile>(projectiles))
             if (projectile != null && projectile.SessionId == session) projectile.Cancel();
+
+        foreach (var effect in new List<RockImpactEffect>(rockImpacts))
+            if (effect != null && effect.SessionId == session) effect.Cancel();
     }
     private void OnDestroy() => CleanupProjectiles(sessionId);
 

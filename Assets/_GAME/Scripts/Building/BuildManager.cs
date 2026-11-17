@@ -30,6 +30,8 @@ public class BuildManager : MonoBehaviour
     }
     public static string GetDisplayName(string id) => id == "arrow" ? "Arrow" : id == "rock" ? "Rock" : id;
     public static int CalculateSellRefund(int invested) => (int)(Math.Max(0, invested) * 7L / 10L);
+    public bool IsUnlocked(string id) => id == "arrow" || (id == "rock" &&
+        bootstrapper && bootstrapper.GetComponent<WaveManager>().CompletedWaves >= 3);
     private bool Validate(BuildPoint point, bool occupied, out string error)
     {
         error = "Gameplay is locked, point unavailable or transaction in progress.";
@@ -39,7 +41,7 @@ public class BuildManager : MonoBehaviour
     public bool TryBuild(BuildPoint point, string id, out string error)
     {
         if (!Validate(point, false, out error)) return false;
-        if (id != "arrow") { error = "Only Arrow is available in this integration milestone."; return false; }
+        if (!IsUnlocked(id)) { error = "Tháp đá mở sau khi hoàn tất wave 3."; return false; }
         var factory = GetTowerFactory();
         if (factory == null || !TryGetBuildCost(id, out var cost) || !economyManager.CanAfford(cost))
         { error = "Missing factory/data or insufficient gold."; return false; }

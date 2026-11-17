@@ -1,114 +1,103 @@
-﻿using UnityEngine;
+using System;
+using System.Linq;
+using System.IO;
+using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.UI;
+using UnityEngine.Splines;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-// Explicit, repeatable editor wiring; never changes scene configuration during Play.
+// Wires existing objects only; never creates points or changes geometry.
 public static class Level01Setup
 {
-    [MenuItem("DATN/Integration/Run Level01 Checks (Play Mode)")]
-    public static void RunChecks()
+    [InitializeOnLoadMethod]
+    private static void PendingConfiguration()
     {
-        if (!Application.isPlaying || UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Level01")
-            throw new System.InvalidOperationException("Open Level01 and enter Play Mode first.");
-        if (UnityEngine.Object.FindFirstObjectByType<LevelIntegrationChecks>())
-            throw new System.InvalidOperationException("Checks already attached. Stop Play Mode before another run.");
-        new GameObject("IntegrationChecks_RuntimeOnly").AddComponent<LevelIntegrationChecks>();
+        EditorApplication.delayCall += () =>
+        {
+            if (!File.Exists("Temp/level01-configure.request") || EditorApplication.isPlayingOrWillChangePlaymode) return;
+            try { Configure(); File.Delete("Temp/level01-configure.request"); }
+            catch (Exception e) { File.WriteAllText("Temp/level01-configure.error", e.ToString()); Debug.LogException(e); }
+        };
     }
-    private static void Ref(Object owner, string field, Object value)
+    private static void Ref(UnityEngine.Object target, string field, UnityEngine.Object value)
     {
-        var so = new SerializedObject(owner); so.FindProperty(field).objectReferenceValue = value; so.ApplyModifiedPropertiesWithoutUndo();
-    }
-    private static RectTransform Rect(string name, Transform parent, Vector2 anchor, Vector2 pos, Vector2 size)
-    {
-        var go = new GameObject(name, typeof(RectTransform)); go.transform.SetParent(parent, false);
-        var r = (RectTransform)go.transform; r.anchorMin = r.anchorMax = anchor; r.pivot = new Vector2(.5f,.5f);
-        r.anchoredPosition = pos; r.sizeDelta = size; return r;
-    }
-    private static Text Text(string name, Transform parent, Vector2 pos, Vector2 size, string label, int fontSize = 22)
-    {
-        var r = Rect(name,parent,new Vector2(.5f,.5f),pos,size); var t=r.gameObject.AddComponent<Text>();
-        t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); t.fontSize=fontSize; t.alignment=TextAnchor.MiddleCenter;
-        t.color=new Color(1f,.95f,.8f); t.text=label; t.raycastTarget=false; return t;
-    }
-    private static Image Panel(string name, Transform parent, Vector2 anchor, Vector2 pos, Vector2 size)
-    {
-        var r=Rect(name,parent,anchor,pos,size); var image=r.gameObject.AddComponent<Image>();
-        image.color=new Color(.10f,.13f,.13f,.96f); return image;
-    }
-    private static Button Button(string name, Transform parent, Vector2 pos, Vector2 size, string label)
-    {
-        var r=Rect(name,parent,new Vector2(.5f,.5f),pos,size); var image=r.gameObject.AddComponent<Image>();
-        image.color=new Color(.35f,.45f,.27f,1f);
-        var b=r.gameObject.AddComponent<Button>(); b.targetGraphic=image;
-        var colors=b.colors; colors.disabledColor=new Color(.3f,.3f,.3f,.65f); b.colors=colors;
-        Text("Label",r,Vector2.zero,size,label,21); return b;
+        var so = new SerializedObject(target); so.FindProperty(field).objectReferenceValue = value;
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
     [MenuItem("DATN/Integration/Configure Level01 Gameplay")]
-    public static void Configure() => ConfigurePoints(8);
-    public static void ConfigureOnePoint() => ConfigurePoints(1);
-    private static void ConfigurePoints(int pointCount)
+    public static void Configure()
     {
-        if (Application.isPlaying) throw new System.InvalidOperationException("Stop Play Mode first.");
-        var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-        if (scene.path!="Assets/_GAME/Scenes/Level01.unity") throw new System.InvalidOperationException("Open existing Level01 first.");
-        var systems=GameObject.Find("Systems");
-        if(!systems) throw new System.InvalidOperationException("Systems must be wired before configuring UI.");
-        var flow=systems.GetComponent<FlowBootstrapper>(); var session=systems.GetComponent<GameSession>();
-        var economy=systems.GetComponent<EconomyManager>(); var wave=systems.GetComponent<WaveManager>();
-        var build=systems.GetComponent<BuildManager>() ?? systems.AddComponent<BuildManager>();
-        var input=systems.GetComponent<BuildInputController>() ?? systems.AddComponent<BuildInputController>();
-        var catalog=AssetDatabase.LoadAssetAtPath<TowerCatalog>("Assets/_GAME/Data/Towers/TowerCatalog.asset");
-        Ref(flow,"gameSession",session); Ref(flow,"economyManager",economy); Ref(flow,"waveManager",wave);
-        Ref(session,"economyManager",economy);
-        Ref(build,"gameSession",session); Ref(build,"economyManager",economy); Ref(build,"bootstrapper",flow); Ref(build,"catalog",catalog);
-        Ref(input,"gameSession",session); Ref(input,"mainCamera",Camera.main);
-        var so=new SerializedObject(input); so.FindProperty("buildPointLayer").intValue=1<<0; so.ApplyModifiedPropertiesWithoutUndo();
-        // All points are off the existing path and within arrow range of a useful segment.
-        var positions=new[]{new Vector3(-7.5f,-.5f,0),new Vector3(-4.6f,0,0),new Vector3(-4.7f,2.5f,0),
-            new Vector3(-2.8f,2.5f,0),new Vector3(-2f,-.6f,0),new Vector3(.1f,1.5f,0),
-            new Vector3(2.7f,.4f,0),new Vector3(.9f,3.1f,0)};
-        var marker=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_GAME/Art/UI/PNG/interface_game/button_quick.png");
-        for(int i=0;i<pointCount;i++)
+        if (Application.isPlaying) throw new InvalidOperationException("Stop Play Mode first.");
+        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        if (scene.path != "Assets/_GAME/Scenes/Level01.unity") throw new InvalidOperationException("Open existing Level01 first.");
+        EditorSceneManager.SaveScene(scene);
+        var points = UnityEngine.Object.FindObjectsByType<BuildPoint>(FindObjectsSortMode.None);
+        if (points.Length != 5) throw new InvalidOperationException("Expected exactly five active BuildPoints.");
+        var containers = UnityEngine.Object.FindObjectsByType<SplineContainer>(FindObjectsSortMode.None)
+            .Where(p => p.name.StartsWith("EnemyPath_Spline")).ToArray();
+        if (containers.Length != 2 || containers.Any(p => p.Splines.Count != 1))
+            throw new InvalidOperationException("Expected two single-spline containers. Geometry preserved.");
+        containers = containers.OrderBy(p => p.transform.TransformPoint((Vector3)p.Spline[0].Position).x).ToArray();
+        var wave = UnityEngine.Object.FindFirstObjectByType<WaveManager>();
+        var so = new SerializedObject(wave);
+        var routes = so.FindProperty("routes"); routes.arraySize = 2;
+        var report = new System.Text.StringBuilder("Level01 geometry and coverage audit\n");
+        for (int i = 0; i < 2; i++)
         {
-            string name="BuildPoint_"+(i+1).ToString("00"); if(GameObject.Find(name)) continue;
-            var go=new GameObject(name); go.transform.position=positions[i];
-            var sr=go.AddComponent<SpriteRenderer>(); sr.sprite=marker; sr.sortingOrder=3;
-            if(marker) go.transform.localScale=Vector3.one*(.65f/Mathf.Max(marker.bounds.size.x,marker.bounds.size.y));
-            var collider=go.AddComponent<CircleCollider2D>(); collider.radius=marker ? Mathf.Max(marker.bounds.size.x,marker.bounds.size.y)*.65f : .45f;
-            var bp=go.AddComponent<BuildPoint>(); bp.SetPointId(name);
-            // Keep anchor scale independent from marker size (factory uses world position only).
-            Ref(bp,"visualRenderer",sr);
+            var p = containers[i]; var start = p.EvaluatePosition(0); var end = p.EvaluatePosition(1);
+            if (end.y <= start.y) throw new InvalidOperationException("Inspect direction before reversing.");
+            routes.GetArrayElementAtIndex(i).FindPropertyRelative("routeId").stringValue = i == 0 ? "route_left" : "route_right";
+            routes.GetArrayElementAtIndex(i).FindPropertyRelative("container").objectReferenceValue = p;
+            report.AppendLine($"{(i == 0 ? "route_left" : "route_right")}: {p.name}; index=0; start={start}; end={end}; length={p.CalculateLength():F3}");
         }
-        if(UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length==0)
-            new GameObject("EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
-        if(GameObject.Find("LevelHUD")) { EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); return; }
-        var canvasGo=new GameObject("LevelHUD",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));
-        var canvas=canvasGo.GetComponent<Canvas>(); canvas.renderMode=RenderMode.ScreenSpaceOverlay;
-        var scaler=canvasGo.GetComponent<CanvasScaler>(); scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution=new Vector2(1600,900); scaler.matchWidthOrHeight=.5f;
-        var hud=canvasGo.AddComponent<LevelHUD>(); hud.flow=flow; hud.waves=wave; hud.builds=build; hud.input=input;
-        var top=Panel("TopBar",canvasGo.transform,new Vector2(.5f,1),new Vector2(0,-36),new Vector2(1600,72));
-        hud.status=Text("Status",top.transform,new Vector2(-310,0),new Vector2(920,60),"GOLD 240   LIVES 20   WAVE 1/3",25);
-        hud.startWave=Button("StartWave",top.transform,new Vector2(300,0),new Vector2(190,52),"Start Wave");
-        hud.pause=Button("Pause",top.transform,new Vector2(500,0),new Vector2(170,52),"Pause");
-        hud.restart=Button("Restart",top.transform,new Vector2(685,0),new Vector2(170,52),"Restart");
-        var bottom=Panel("BuildMenu",canvasGo.transform,new Vector2(.5f,0),new Vector2(0,72),new Vector2(1600,144));
-        hud.selection=Text("Selection",bottom.transform,new Vector2(-450,26),new Vector2(620,48),"Select a marked build point");
-        hud.message=Text("Message",bottom.transform,new Vector2(0,-40),new Vector2(1500,36),"Build arrows, then press Start Wave",18);
-        hud.buy=Button("BuyArrow",bottom.transform,new Vector2(260,24),new Vector2(230,54),"Buy Arrow");
-        // Never replace Buy with Upgrade under the same pointer during a double click.
-        hud.upgrade=Button("Upgrade",bottom.transform,new Vector2(0,24),new Vector2(230,54),"Upgrade");
-        hud.sell=Button("Sell",bottom.transform,new Vector2(520,24),new Vector2(230,54),"Sell");
-        var overlay=Panel("ResultOverlay",canvasGo.transform,new Vector2(.5f,.5f),Vector2.zero,new Vector2(4000,3000));
-        overlay.color=new Color(0,0,0,.65f); hud.resultPanel=overlay.gameObject;
-        var box=Panel("Result",overlay.transform,new Vector2(.5f,.5f),Vector2.zero,new Vector2(500,270));
-        hud.resultTitle=Text("ResultTitle",box.transform,new Vector2(0,65),new Vector2(480,80),"VICTORY",44);
-        hud.resultRestart=Button("ResultRestart",box.transform,new Vector2(0,-50),new Vector2(250,65),"Restart");
-        hud.resultPanel.SetActive(false);
+        var waves = so.FindProperty("waves"); waves.arraySize = 6;
+        for (int i = 0; i < 6; i++) waves.GetArrayElementAtIndex(i).objectReferenceValue =
+            AssetDatabase.LoadAssetAtPath<WaveData>($"Assets/_GAME/Data/Waves/Wave{i + 1:00}.asset");
+        so.ApplyModifiedPropertiesWithoutUndo();
+        var arrow = AssetDatabase.LoadAssetAtPath<TowerData>("Assets/_GAME/Data/Towers/TowerData_Arrow.asset");
+        if (!arrow || !arrow.TryGetLevel(1, out var stats, out _)) throw new InvalidOperationException("Arrow data missing.");
+        foreach (var point in points.OrderBy(p => p.name))
+        {
+            point.SetPointId(point.name);
+            Ref(point, "buildAnchor", point.transform); Ref(point, "visualRenderer", point.GetComponent<SpriteRenderer>());
+            point.gameObject.layer = LayerMask.NameToLayer("BuildPoint");
+            var collider = point.GetComponent<Collider2D>();
+            if (!collider) throw new InvalidOperationException(point.name + " has no collider.");
+            collider.enabled = true;
+            float nearest = float.PositiveInfinity;
+            foreach (var path in containers) for (int i = 0; i <= 2000; i++)
+            { Vector2 offset = (Vector3)path.EvaluatePosition(i / 2000f) - point.AnchorPosition; nearest = Mathf.Min(nearest, offset.magnitude); }
+            report.AppendLine($"{point.PointId}: anchor={point.AnchorPosition}; collider={collider.GetType().Name}; nearest route={nearest:F3}; range={stats.range}; useful={nearest <= stats.range}");
+            if (nearest > stats.range) Debug.LogWarning(point.name + " has no route in range; layout preserved.", point);
+        }
+        var input = UnityEngine.Object.FindFirstObjectByType<BuildInputController>();
+        var inputSO = new SerializedObject(input); inputSO.FindProperty("buildPointLayer").intValue = 1 << LayerMask.NameToLayer("BuildPoint"); inputSO.ApplyModifiedPropertiesWithoutUndo();
+        var hud = UnityEngine.Object.FindFirstObjectByType<LevelHUD>();
+        if (!hud.buyRock)
+        {
+            hud.buyRock = UnityEngine.Object.Instantiate(hud.buy, hud.buy.transform.parent);
+            hud.buyRock.name = "BuyRock";
+            ((RectTransform)hud.buyRock.transform).anchoredPosition = new Vector2(520, 24);
+            hud.buyRock.GetComponentInChildren<Text>().text = "Đá 140 (sau đợt 3)";
+        }
+        hud.message.text = "Bảo vệ cửa hầm — chống lại 6 đợt quái";
+        var menu = (RectTransform)hud.buy.transform.parent;
+        menu.anchorMin = menu.anchorMax = new Vector2(0, 0);
+        menu.anchoredPosition = new Vector2(380, 72); menu.sizeDelta = new Vector2(760, 144);
+        Place(hud.selection.rectTransform, new Vector2(0, 50), new Vector2(740, 35));
+        Place(hud.message.rectTransform, new Vector2(0, -45), new Vector2(740, 40));
+        Place((RectTransform)hud.buy.transform, new Vector2(-180, 5), new Vector2(230, 48));
+        Place((RectTransform)hud.buyRock.transform, new Vector2(100, 5), new Vector2(290, 48));
+        Place((RectTransform)hud.upgrade.transform, new Vector2(70, 5), new Vector2(220, 48));
+        Place((RectTransform)hud.sell.transform, new Vector2(280, 5), new Vector2(170, 48));
+        EditorUtility.SetDirty(hud);
+        File.WriteAllText("Docs/Level01-geometry-audit.txt", report.ToString());
         EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
-        Debug.Log("Level01 gameplay configured: real services, 8 build points, Canvas and InputSystem EventSystem.");
+        Debug.Log(report.ToString());
     }
+    public static void ConfigureOnePoint() => Configure();
+    private static void Place(RectTransform r, Vector2 p, Vector2 size) { r.anchoredPosition = p; r.sizeDelta = size; }
+    [MenuItem("DATN/Integration/Run Level01 Checks (Play Mode)")]
+    public static void RunChecks() => Debug.LogWarning("Legacy three-wave/eight-point checks are obsolete. Follow Docs/Level01.md.");
 }

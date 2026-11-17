@@ -30,6 +30,8 @@ public class GameSession : MonoBehaviour
     public int CurrentWave => currentWave;
     public int TotalWaves => totalWaves;
     public int AliveEnemies => aliveEnemies;
+    public int WaveKills { get; private set; }
+    public int WaveLeaks { get; private set; }
 
     public bool BuildAllowed => accepting && (state == GameState.Preparing || state == GameState.Running);
     public bool CanStartWave => accepting && state == GameState.Preparing;
@@ -58,6 +60,7 @@ public class GameSession : MonoBehaviour
         currentWave = 1;
         totalWaves = Mathf.Max(1, maxWaves);
         aliveEnemies = 0;
+        WaveKills = WaveLeaks = 0;
         stateBeforePause = GameState.Preparing;
 
         resolvedQueue.Clear();
@@ -140,6 +143,7 @@ public class GameSession : MonoBehaviour
 
     public void SetWave(int waveIndex, int waveTotal)
     {
+        WaveKills = WaveLeaks = 0;
         currentWave = waveIndex;
         totalWaves = waveTotal;
         NotifySnapshot();
@@ -207,10 +211,12 @@ public class GameSession : MonoBehaviour
 
             if (item.Reason == ResolutionReason.Dead)
             {
+                WaveKills++;
                 bounty += Mathf.Max(0, item.Bounty);
             }
             else if (item.Reason == ResolutionReason.Escaped)
             {
+                WaveLeaks++;
                 lives = Mathf.Max(0, lives - Mathf.Max(0, item.LeakDamage));
             }
 

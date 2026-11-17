@@ -16,19 +16,23 @@ MonoBehaviour:
   prefab: {fileID: 3977117608200049399, guid: 9739a1f6806144eea0618a712040bb3e, type: 3}
   icon: {fileID: 21300000, guid: 4dd58e28724c460799ef26652b6d8d7a, type: 3}
   levels:
-  - radius: 1
-    damage: 30
+  - damage: 30
     cooldown: 2
     range: 3
     projectileSpeed: 4
     projectilePrefab: {fileID: 8968876398508882181, guid: c6a844e34b6d4b4c914e9e01c9ad398d, type: 3}
+    radius: 1
     cost: 140
     bodySprite: {fileID: 21300000, guid: 4dd58e28724c460799ef26652b6d8d7a, type: 3}
-  - radius: 1.25
-    damage: 50
+    launchRearSprite: {fileID: 21300000, guid: e1e4fd35115c6b94ea3806441c385dc2, type: 3}
+    launchFrontSprite: {fileID: 21300000, guid: bdc7080b8f170a347bf7793d7d18b84c, type: 3}
+  - damage: 50
     cooldown: 1.8
     range: 3
     projectileSpeed: 4
-    projectilePrefab: {fileID: 8968876398508882181, guid: c6a844e34b6d4b4c914e9e01c9ad398d, type: 3}
+    projectilePrefab: {fileID: 3566244413602849721, guid: f4b9a47bc56cc9d42b7f3b792f8a99ba, type: 3}
+    radius: 1.25
     cost: 140
-    bodySprite: {fileID: 21300000, guid: 4bde2e6737f34488a83169ed9e3e5072, type: 3}
+    bodySprite: {fileID: 21300000, guid: db367ccfd05bf184fb6b1b996b45c857, type: 3}
+    launchRearSprite: {fileID: 21300000, guid: 3cd6d85d2c60c84408a6bc91011d180b, type: 3}
+    launchFrontSprite: {fileID: 21300000, guid: 940db2852145fd3479bf2269614f678f, type: 3}

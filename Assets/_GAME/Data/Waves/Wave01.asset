@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e2e6f3efd0be5741999a2189e23a8e9, type: 3}
   m_Name: Wave01
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
-  enemyId: normal
-  count: 5
-  interval: 1.5
+  groups:
+  - enemyId: normal
+    routeId: route_left
+    count: 5
+    interval: 1.8
+    delayBeforeGroup: 0

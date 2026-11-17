@@ -7,6 +7,7 @@ public class Tower : MonoBehaviour
     [SerializeField] private Transform muzzle;
     [SerializeField] private SpriteRenderer body;
     [SerializeField] private Animator animator;
+    [SerializeField] private RockTowerLift rockLift;
     [Header("Runtime (per instance)")]
     [SerializeField] private int level;
     [SerializeField] private bool initialized;
@@ -22,6 +23,8 @@ public class Tower : MonoBehaviour
     private bool automaticTargeting;
     private readonly TowerTargeting targeting = new TowerTargeting();
     private int shotId;
+    private TowerLevelStats pendingRockStats;
+    private EnemyHandle pendingRockTarget;
     public EnemyHandle CurrentTarget => targeting.Current;
     public int ShotCount => shotId;
     public readonly struct ShotRecord
@@ -88,8 +91,11 @@ public class Tower : MonoBehaviour
         var projectile = selected.projectilePrefab == null ? null : selected.projectilePrefab.GetComponent<Projectile>();
         if (projectile == null) { error = "Missing Projectile prefab."; return false; }
         if (!projectile.TryValidate(out error)) return false;
+        if (projectile is Projectile_Rock && rockLift != null && !rockLift.IsConfigured(transform, body, muzzle))
+        { error = "Rock lift requires a separate child platform, loaded stone and child Muzzle."; return false; }
+        float liftTravel = rockLift != null ? rockLift.WorldRise : 0f;
         if (projectile is Projectile_Rock && (selected.radius <= 0f ||
-            (selected.range + Vector3.Distance(transform.position, muzzle.position)) / selected.projectileSpeed >= projectile.Lifetime))
+            (selected.range + Vector3.Distance(transform.position, muzzle.position) + liftTravel) / selected.projectileSpeed >= projectile.Lifetime))
         { error = "Rock requires positive radius and lifetime exceeding maximum range flight from Muzzle."; return false; }
         return true;
     }
@@ -105,6 +111,7 @@ public class Tower : MonoBehaviour
         level = nextLevel;
         remainingCooldown = nextRemaining;
         body.sprite = next.bodySprite;
+        if (rockLift != null) rockLift.ApplyLevelVisuals(next);
         targeting.Reset();
         error = string.Empty;
         return true;
@@ -149,6 +156,7 @@ public class Tower : MonoBehaviour
         targeting.Reset();
         if (stats.bodySprite != null)
             body.sprite = stats.bodySprite;
+        if (rockLift != null) rockLift.ApplyLevelVisuals(stats);
         initialized = true;
         error = string.Empty;
         return true;
@@ -179,7 +187,18 @@ public class Tower : MonoBehaviour
         return true;
     }
 
-    public void Suspend() => activeCombat = false;
+    public void Suspend()
+    {
+        activeCombat = false;
+        ClearPendingRock();
+        if (rockLift != null) rockLift.ResetLift();
+    }
+
+    private void ClearPendingRock()
+    {
+        pendingRockStats = default;
+        pendingRockTarget = default;
+    }
 
     public bool ActivateTargeting(bool preview = false)
     {
@@ -193,34 +212,99 @@ public class Tower : MonoBehaviour
 
     private void Update()
     {
-        if (!IsActive || Time.timeScale <= 0f || Time.deltaTime <= 0f) return;
-        remainingCooldown = Mathf.Max(0f, remainingCooldown - Time.deltaTime);
+        if (!IsActive)
+        {
+            if (activeCombat) Suspend();
+            return;
+        }
+        float dt = Time.deltaTime;
+        if (Time.timeScale <= 0f || dt <= 0f) return;
+        float previousCooldown = remainingCooldown;
+        remainingCooldown = Mathf.Max(0f, remainingCooldown - dt);
         if (!automaticTargeting) return;
-        var target = targeting.Tick(registry, sessionId, transform.position, stats.range, Time.deltaTime);
+        var target = targeting.Tick(registry, sessionId, transform.position, stats.range, dt);
+
+        if (!previewOnly && rockLift != null)
+        {
+            UpdateRockLift(target, previousCooldown, dt);
+            return;
+        }
+
         if (remainingCooldown > 0f || muzzle == null ||
             !TowerTargeting.IsValid(target, sessionId, transform.position, stats.range)) return;
-        if (!previewOnly)
+        if (!previewOnly && !Launch(target, stats)) return;
+        RecordShot(target);
+    }
+
+    private void UpdateRockLift(EnemyHandle target, float previousCooldown, float dt)
+    {
+        if (rockLift.IsReturning)
         {
-            if (!TryValidateForActivation(out _)) { Suspend(); return; }
-            var instance = Instantiate(stats.projectilePrefab, muzzle.position, Quaternion.identity);
-            var projectile = instance.GetComponent<Projectile>();
-            bool launched;
-            if (projectile is Projectile_Rock rock)
-            {
-                // Exactly one position read at launch; rock never keeps a target reference.
-                Vector3 impactPosition = target.Position;
-                impactPosition.z = muzzle.position.z;
-                launched = rock.Initialize(new RockShotContext(impactPosition, sessionId, stats.damage,
-                    stats.radius, stats.projectileSpeed, projectile.Lifetime), resolver);
-            }
-            else
-            {
-                var context = new ShotContext(target, sessionId, stats.damage, stats.projectileSpeed, projectile.Lifetime);
-                launched = projectile.Initialize(context, resolver);
-            }
-            if (!launched)
-            { Destroy(instance); Suspend(); return; }
+            rockLift.Tick(dt);
+            return;
         }
+
+        if (!rockLift.IsWindingUp)
+        {
+            if (remainingCooldown > rockLift.WindupDuration ||
+                !TowerTargeting.IsValid(target, sessionId, transform.position, stats.range)) return;
+            if (!TryValidateForActivation(out _) || !rockLift.IsConfigured(transform, body, muzzle))
+            { Suspend(); return; }
+
+            pendingRockStats = stats;
+            pendingRockTarget = target;
+            rockLift.BeginWindup();
+            // When preloading during cooldown, only consume the part of the frame
+            // after its windup window opened. A fresh shot starts on the next tick.
+            dt = previousCooldown > 0f
+                ? Mathf.Clamp(rockLift.WindupDuration - remainingCooldown, 0f, dt)
+                : 0f;
+        }
+
+        if (!rockLift.Tick(dt) || remainingCooldown > 0f) return;
+        var shotTarget = pendingRockTarget;
+        var shotStats = pendingRockStats;
+        ClearPendingRock();
+
+        if (!TowerTargeting.IsValid(shotTarget, sessionId, transform.position, shotStats.range))
+        {
+            rockLift.BeginReturn(false);
+            return;
+        }
+
+        rockLift.BeginReturn(true);
+        if (Launch(shotTarget, shotStats)) RecordShot(shotTarget);
+    }
+
+    private bool Launch(EnemyHandle target, TowerLevelStats shotStats)
+    {
+        if (muzzle == null || shotStats.projectilePrefab == null ||
+            !shotStats.projectilePrefab.TryGetComponent<Projectile>(out var template) ||
+            !template.TryValidate(out _))
+        { Suspend(); return false; }
+
+        var instance = Instantiate(shotStats.projectilePrefab, muzzle.position, Quaternion.identity);
+        var projectile = instance.GetComponent<Projectile>();
+        bool launched;
+        if (projectile is Projectile_Rock rock)
+        {
+            Vector3 impactPosition = target.Position;
+            impactPosition.z = muzzle.position.z;
+            launched = rock.Initialize(new RockShotContext(impactPosition, sessionId, shotStats.damage,
+                shotStats.radius, shotStats.projectileSpeed, projectile.Lifetime), resolver);
+        }
+        else
+        {
+            var context = new ShotContext(target, sessionId, shotStats.damage, shotStats.projectileSpeed, projectile.Lifetime);
+            launched = projectile.Initialize(context, resolver);
+        }
+        if (!launched)
+        { Destroy(instance); Suspend(); }
+        return launched;
+    }
+
+    private void RecordShot(EnemyHandle target)
+    {
         remainingCooldown = stats.cooldown;
         shotId++;
         var shot = new ShotRecord(this, target);

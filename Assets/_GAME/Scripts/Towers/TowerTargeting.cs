@@ -26,8 +26,8 @@ public sealed class TowerTargeting
         foreach (var candidate in buffer)
         {
             if (!IsValid(candidate, session, origin, range)) continue;
-            if (!best.IsAlive || candidate.Progress > best.Progress ||
-                (candidate.Progress == best.Progress && candidate.Identity.SpawnId < best.Identity.SpawnId))
+            if (!best.IsAlive || candidate.RemainingDistance < best.RemainingDistance ||
+                (candidate.RemainingDistance == best.RemainingDistance && candidate.Identity.SpawnId < best.Identity.SpawnId))
                 best = candidate;
         }
         Current = best;

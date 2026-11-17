@@ -1,0 +1,37 @@
+Unity 6000.3.11f1 | 2026-11-16T22:10:29
+Automated Play Mode checks; synthetic combat fixtures are separate from the six-wave no-cheat playthrough.
+PASS Exactly five unique active points
+PASS BuildPoint_01 world mouse pick unblocked by UI
+PASS BuildPoint_01 buy 100
+PASS BuildPoint_01 upgrade 100
+PASS BuildPoint_01 sell floor(70% of 200), empty
+PASS BuildPoint_02 world mouse pick unblocked by UI
+PASS BuildPoint_02 buy 100
+PASS BuildPoint_02 upgrade 100
+PASS BuildPoint_02 sell floor(70% of 200), empty
+PASS BuildPoint_03 world mouse pick unblocked by UI
+PASS BuildPoint_03 buy 100
+PASS BuildPoint_03 upgrade 100
+PASS BuildPoint_03 sell floor(70% of 200), empty
+PASS BuildPoint_04 world mouse pick unblocked by UI
+PASS BuildPoint_04 buy 100
+PASS BuildPoint_04 upgrade 100
+PASS BuildPoint_04 sell floor(70% of 200), empty
+PASS BuildPoint_05 world mouse pick unblocked by UI
+PASS BuildPoint_05 buy 100
+PASS BuildPoint_05 upgrade 100
+PASS BuildPoint_05 sell floor(70% of 200), empty
+PASS Rock purchase service locked initially
+PASS Target shorter remaining route distance despite lower normalized progress
+PASS Splash hits both routes once per identity through CombatResolver
+PASS Pause freezes enemies on both routes
+PASS Restart cleans both routes, projectiles, five points, unlocks and 240/20
+PASS Pause freezes spawn interval
+PASS Resume continues same spawn schedule
+PASS Restart cancels pending spawn interval
+PASS Pending group prevents early completion
+PASS Pause freezes delayBeforeGroup
+PASS Next group spawns without waiting for previous enemies to die
+PASS Restart cancels pending group delay
+PASS Lethal final batch chooses Defeat before Victory; duplicate escape, no reward
+FINISHED boundary recheck; six-wave run recorded separately in Level01-six-wave-results.txt
