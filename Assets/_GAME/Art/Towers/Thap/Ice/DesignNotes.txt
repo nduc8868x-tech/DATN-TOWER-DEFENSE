@@ -1,0 +1,137 @@
+# 1. THÁP BĂNG – ICE MAGIC TOWER
+
+## 1.1. Giới thiệu
+
+Tháp Băng là công trình phòng thủ sử dụng ma thuật băng giá để tấn công và làm chậm tốc độ di chuyển của kẻ địch.
+
+Khác với Tháp Hỏa có khả năng gây sát thương liên tục, Tháp Băng tập trung vào việc kiểm soát mục tiêu, kéo dài thời gian quái vật nằm trong phạm vi tấn công của các tháp khác.
+
+Vai trò chính Hỗ trợ khống chế (Crowd Control – CC), đặc biệt hiệu quả trước những quái vật có tốc độ di chuyển cao.
+
+## 1.2. Bảng thông số
+
+ Thuộc tính  Cấp 1  Cấp 2 
+---------
+ Giá xây dựng  90 vàng  — 
+ Giá nâng cấp  —  90 vàng 
+ Sát thương mỗi đòn  6  10 
+ Thời gian giữa các đòn  1,0 giây  0,9 giây 
+ Tầm bắn  3,1 đơn vị  3,4 đơn vị 
+ Hiệu ứng làm chậm  30%  40% 
+ Thời gian làm chậm  1,5 giây  1,8 giây 
+ Số mục tiêu mỗi đòn  1  1 
+ Tổng vốn đầu tư  90 vàng  180 vàng 
+ Giá bán (70%)  63 vàng  126 vàng 
+
+Nguồn thông số Giá, sát thương, nhịp bắn và hiệu ứng làm chậm kế thừa Tháp Phép trong GDD ban đầu. Tầm bắn và việc phân nhánh thành Tháp Băng là phần thiết kế đề xuất.
+
+## 1.3. Cơ chế chiến đấu
+
+### Cấp 1 – Frost Tower
+
+Tháp tự động tìm kiếm quái vật trong phạm vi 3,1 đơn vị và bắn ra một tia ma thuật băng màu xanh ngọc.
+
+Khi tia phép chạm vào quái vật
+
+- Gây 6 sát thương.
+- Giảm 30% tốc độ di chuyển.
+- Hiệu ứng kéo dài 1,5 giây.
+- Chỉ ảnh hưởng một mục tiêu mỗi lần bắn.
+
+Ví dụ
+
+Quái Runner có tốc độ cơ bản 1,9 đơn vịgiây.
+
+Sau khi bị Tháp Băng cấp 1 tấn công
+
+1,9 × (1 − 0,30) = 1,33 đơn vịgiây.
+
+Nhờ vậy, quái di chuyển chậm hơn và các tháp khác có thêm thời gian tấn công.
+
+### Cấp 2 – Advanced Frost Tower
+
+Sau khi nâng cấp, tháp thay đổi ngoại hình sang phiên bản lớn hơn với mái có thêm các chi tiết ma thuật phát sáng.
+
+Các thay đổi
+
+- Sát thương tăng từ 6 lên 10.
+- Thời gian giữa hai đòn giảm từ 1,0 xuống 0,9 giây.
+- Tầm bắn tăng từ 3,1 lên 3,4 đơn vị.
+- Làm chậm tăng từ 30% lên 40%.
+- Thời gian làm chậm tăng từ 1,5 lên 1,8 giây.
+
+Ví dụ với Runner
+
+1,9 × (1 − 0,40) = 1,14 đơn vịgiây.
+
+Tháp cấp 2 giúp giảm áp lực tại những đoạn đường có nhiều quái chạy nhanh.
+
+## 1.4. Quy tắc làm chậm
+
+Để tránh lỗi cân bằng, hiệu ứng băng tuân theo các nguyên tắc
+
+1. Quái vật chỉ chịu hiệu ứng làm chậm mạnh nhất đang tác dụng.
+2. Hai Tháp Băng cùng bắn một mục tiêu không cộng dồn thành 60% hoặc 80% Slow.
+3. Đòn đánh mới làm mới thời gian hiệu ứng.
+4. Khi hết thời gian, quái trở lại tốc độ di chuyển ban đầu.
+5. Quái đang bị chặn bởi lính vẫn có thể chịu sát thương băng.
+6. Boss có thể chịu hiệu ứng Slow, nhưng không được khóa đứng vĩnh viễn chỉ bằng các hiệu ứng làm chậm.
+
+Quy tắc giảm hiệu lực Slow riêng trên boss có thể bổ sung sau khi kiểm thử.
+
+## 1.5. Sát thương theo thời gian (DPS)
+
+DPS được tính bằng
+
+DPS = Damage  Thời gian giữa các đòn
+
+ Chỉ số  Cấp 1  Cấp 2 
+---------
+ Damage  6  10 
+ Thời gianđòn  1,0s  0,9s 
+ DPS lý thuyết  6,00  11,11 
+
+DPS của Tháp Băng thấp hơn Tháp Cung vì nhiệm vụ chính của tháp là làm chậm và hỗ trợ các công trình khác.
+
+## 1.6. Điểm mạnh và điểm yếu
+
+### Điểm mạnh
+
+- Khắc chế tốt quái Runner.
+- Kéo dài thời gian quái nằm trong tầm bắn của tháp khác.
+- Có giá mua thấp, dễ bổ sung vào đội hình phòng thủ.
+- Hiệu quả tại các khúc cua và điểm hợp lưu.
+- Nâng cấp làm tăng cả sát thương và khả năng khống chế.
+
+### Điểm yếu
+
+- Sát thương trực tiếp thấp.
+- Không thể tự tiêu diệt nhanh quái giáp hoặc boss.
+- Không gây sát thương diện rộng.
+- Nhiều Tháp Băng đặt cùng chỗ có thể gây lãng phí hiệu ứng.
+- Không chặn trực tiếp đường di chuyển của quái.
+
+
+
+## 1.9. Logic nâng cấp trong Unity
+
+Khi người chơi chọn nâng cấp
+
+1. Kiểm tra tháp đang ở cấp 1.
+2. Kiểm tra người chơi có đủ 90 vàng.
+3. Trừ 90 vàng.
+4. Thay sprite cấp 1 thành sprite cấp 2.
+5. Tăng sát thương từ 6 lên 10.
+6. Giảm thời gian giữa các đòn từ 1,0 xuống 0,9 giây.
+7. Tăng tầm bắn lên 3,4 đơn vị.
+8. Tăng hiệu ứng Slow thành 40% trong 1,8 giây.
+9. Cập nhật giá bán thành 126 vàng.
+10. Khóa chức năng nâng cấp vì tháp đạt cấp tối đa.
+
+## 1.10. Kết luận thiết kế
+
+Tháp Băng đóng vai trò kiểm soát tốc độ di chuyển của quái vật, không phải công trình gây sát thương chủ lực.
+
+Việc kết hợp Tháp Băng với các tháp tấn công giúp người chơi xây dựng nhiều phương án phòng thủ khác nhau.
+
+Cơ chế làm chậm cũng tạo ra giá trị chiến thuật cho việc lựa chọn vị trí xây tháp, đặc biệt ở những bản đồ có nhiều khúc cua hoặc đường quái hội tụ.

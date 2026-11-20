@@ -162,14 +162,9 @@ public class FlowSandboxDebugPanel : MonoBehaviour
             GUILayout.Label($"Ô đang chọn: <b>{selected.PointId}</b> (Ô trống)");
             GUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("Xây Arrow (100g)"))
+            buildManager.TryGetBuildCost("arrow", out int buildCost);
+            if (GUILayout.Button($"Xây Arrow ({buildCost}g)"))
                 HandleBuildClick(selected, "arrow");
-
-            if (GUILayout.Button("Xây Stone (140g)"))
-                HandleBuildClick(selected, "stone");
-
-            if (GUILayout.Button("Xây Magic (90g)"))
-                HandleBuildClick(selected, "magic");
 
             GUILayout.EndHorizontal();
         }
@@ -184,7 +179,7 @@ public class FlowSandboxDebugPanel : MonoBehaviour
 
             if (snap.Level < snap.MaxLevel)
             {
-                BuildManager.TryGetTowerCost(snap.TowerId, snap.Level + 1, out int upgCost);
+                buildManager.TryGetTowerCost(snap.TowerId, snap.Level + 1, out int upgCost);
                 if (GUILayout.Button($"Nâng cấp Lv{snap.Level + 1} ({upgCost}g)"))
                     HandleUpgradeClick(selected);
             }
@@ -248,10 +243,11 @@ public class FlowSandboxDebugPanel : MonoBehaviour
         {
             if (fakeEnemyService != null && session.Lives > 0)
             {
+                if (session.State == GameState.Preparing) session.TrySetState(GameState.Running);
                 var req = new EnemySpawnRequest(session.SessionId, session.CurrentWave, "normal", null);
                 if (fakeEnemyService.TrySpawn(req, out EnemyHandle h))
                 {
-                    session.RegisterEnemySpawned();
+                    session.RegisterEnemySpawned(h, session.CurrentWave);
                     fakeEnemyService.BeginMovement(h);
                     session.EnqueueResolved(new EnemyResolved(session.SessionId, session.CurrentWave, h.Identity.SpawnId, ResolutionReason.Escaped, 0, session.Lives));
                     lastStatusMessage = "Đã kích hoạt quái gây sát thương bằng đúng số mạng còn lại.";
@@ -323,7 +319,7 @@ public class FlowSandboxDebugPanel : MonoBehaviour
             var req = new EnemySpawnRequest(session.SessionId, session.CurrentWave, "normal", null);
             if (service.TrySpawn(req, out EnemyHandle handle))
             {
-                session.RegisterEnemySpawned();
+                session.RegisterEnemySpawned(handle, session.CurrentWave);
                 service.BeginMovement(handle);
                 spawned++;
             }
@@ -334,9 +330,8 @@ public class FlowSandboxDebugPanel : MonoBehaviour
 
     private void RestartMatch()
     {
-        buildManager?.ClearAllTowers();
-        buildInput?.ClearSelection();
         bootstrapper.StartNewSession();
         lastStatusMessage = $"Đã Restart -> Session mới ID {bootstrapper.Session.SessionId} (240 vàng, 20 mạng).";
     }
 }
+

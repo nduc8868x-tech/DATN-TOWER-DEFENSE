@@ -22,6 +22,11 @@ public class EnemyMovement : MonoBehaviour
 
     public bool IsMoving => moving;
     public bool HasReachedEnd => reachedEnd;
+    private float routeLength;
+    private static readonly System.Collections.Generic.Dictionary<SplineContainer, float> lengths = new();
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ClearLengths() => lengths.Clear();
+    public float RemainingDistance => initialized ? Mathf.Max(0f, (1f - Progress) * routeLength) : float.PositiveInfinity;
 
     public float Progress =>
     initialized && splineAnimate != null
@@ -82,6 +87,8 @@ public class EnemyMovement : MonoBehaviour
 
         splineAnimate.PlayOnAwake = false;
         splineAnimate.Container = path;
+        if (!lengths.TryGetValue(path, out routeLength))
+        { routeLength = path.CalculateLength(); lengths[path] = routeLength; }
         splineAnimate.AnimationMethod = SplineAnimate.Method.Speed;
         splineAnimate.MaxSpeed = speed;
         splineAnimate.Loop = SplineAnimate.LoopMode.Once;

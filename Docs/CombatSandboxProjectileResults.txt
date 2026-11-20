@@ -1,0 +1,26 @@
+Session 10 verification
+PASS Arrow 1: HP unchanged at launch
+PASS Arrow 1: one 16-damage hit then destroyed
+PASS Arrow 2: HP unchanged at launch
+PASS Arrow 2: one 16-damage hit then destroyed
+PASS Arrow 3: HP unchanged at launch
+PASS Arrow 3: one 16-damage hit then destroyed
+PASS Arrow 4: HP unchanged at launch
+PASS Arrow 4: one 16-damage hit then destroyed
+HP: 60 -> 44 -> 28 -> 12 -> 0
+PASS Four hits emit one Dead result
+PASS Two simultaneous lethal arrows: one Dead
+PASS Dead target cancels arrow, never retargets
+PASS Destroyed target cancels arrow safely
+PASS Changed identity invalidates in-flight handle
+PASS Pause 2.5 seconds freezes movement, lifetime and hit
+PASS Resume continues flight and hits once
+PASS Lifetime expiration destroys without hit
+PASS Unactivated tower creates no arrows
+PASS Tower launches one real arrow from Muzzle before damage
+PASS Level change after launch preserves original damage 16
+PASS Suspend prevents new projectiles
+PASS Destroy tower after launch: independent arrow still hits for level-II damage 28
+PASS Session cleanup destroys all arrows including missing-target arrows while paused
+PASS New session destroys old arrows and rejects queued/late old-identity hits
+TOTAL 23/23 passed

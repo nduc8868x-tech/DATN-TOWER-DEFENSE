@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e588544716fbc74b8767b8ac5992772, type: 3}
+  m_Name: TowerData_Lightning
+  m_EditorClassIdentifier: Assembly-CSharp::TowerData
+  towerId: lightning
+  prefab: {fileID: 2283075600195374942, guid: 3d6ad98f1c15598429f6d4998994245a, type: 3}
+  icon: {fileID: 21300000, guid: 8febb409e3df50748badb08be53ecd21, type: 3}
+  levels:
+  - damage: 18
+    cooldown: 1.3
+    range: 3.2
+    projectileSpeed: 8
+    projectilePrefab: {fileID: 2814681321873572613, guid: c6360d4a05092ff498396af4ecad52f4, type: 3}
+    radius: 0
+    cost: 120
+    bodySprite: {fileID: 21300000, guid: 8febb409e3df50748badb08be53ecd21, type: 3}
+    launchRearSprite: {fileID: 0}
+    launchFrontSprite: {fileID: 0}
+  - damage: 32
+    cooldown: 1.1
+    range: 3.5
+    projectileSpeed: 8
+    projectilePrefab: {fileID: 2811110953437644280, guid: b9eebfaf4ea3ffb4a8c51bba5002fa05, type: 3}
+    radius: 0
+    cost: 160
+    bodySprite: {fileID: 21300000, guid: 38f3037221a3df04fad5b0b7eb1d6560, type: 3}
+    launchRearSprite: {fileID: 0}
+    launchFrontSprite: {fileID: 0}

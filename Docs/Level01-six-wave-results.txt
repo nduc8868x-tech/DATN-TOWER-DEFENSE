@@ -1,0 +1,22 @@
+BEGIN SIX-WAVE PLAYTHROUGH: normal timeScale=1, production purchase/upgrade/start APIs, no injected gold/damage/spawns.
+PASS Wave 1 manual start, duplicate rejected
+WAVE 1: state=Preparing; gold=100; lives=20; spawned=5; killed=5; leaked=0; spawnFinished=True; alive=0
+PASS Wave 1 fully resolved
+PASS Wave 2 manual start, duplicate rejected
+WAVE 2: state=Preparing; gold=84; lives=20; spawned=8; killed=8; leaked=0; spawnFinished=True; alive=0
+PASS Wave 2 fully resolved
+PASS Wave 3 manual start, duplicate rejected
+WAVE 3: state=Preparing; gold=181; lives=20; spawned=10; killed=10; leaked=0; spawnFinished=True; alive=0
+PASS Wave 3 fully resolved
+PASS Rock unlocked after completed wave 3
+PASS Wave 4 manual start, duplicate rejected
+WAVE 4: state=Preparing; gold=157; lives=20; spawned=12; killed=12; leaked=0; spawnFinished=True; alive=0
+PASS Wave 4 fully resolved
+PASS Wave 5 manual start, duplicate rejected
+WAVE 5: state=Preparing; gold=185; lives=20; spawned=14; killed=14; leaked=0; spawnFinished=True; alive=0
+PASS Wave 5 fully resolved
+PASS Wave 6 manual start, duplicate rejected
+WAVE 6: state=Victory; gold=205; lives=20; spawned=18; killed=18; leaked=0; spawnFinished=True; alive=0
+PASS Wave 6 fully resolved
+PASS Six-wave no-cheat playthrough Victory
+FINISHED

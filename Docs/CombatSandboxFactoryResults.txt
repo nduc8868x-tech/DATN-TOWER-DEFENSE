@@ -1,0 +1,22 @@
+Session 11 verification
+PASS Bad ID/level/position return false without objects
+PASS Missing resolver rejected before Instantiate
+PASS Failed transaction rollback destroys tower, repeated Dispose safe
+PASS Disposed handle rejects all operations
+PASS Create stays inactive with target in range
+PASS Snapshot exposes ID and shared-data prices by value
+PASS Activate succeeds
+PASS Activated tower launches real arrow before damage
+PASS Upgrade I to II while old arrow is flying
+PASS Active upgrade preserves ratio: 0.8000/0.8 -> 0.6500/0.65; damage=28 range=3
+PASS Pre-upgrade arrow retains 16 damage (60 -> 44)
+PASS Upgrading first tower leaves second unchanged
+PASS Shared ScriptableObject unchanged
+PASS Invalid upgrades preserve level/stats/cooldown/state atomically
+PASS Post-upgrade arrow uses 28 damage and survives tower disposal (44 -> 16)
+PASS Suspend/Dispose leaves no invisible firing tower
+PASS Mid-cooldown suspended upgrade: 0.398916/0.8 -> 0.324119/0.65 (ideal 0.4 -> 0.325)
+PASS Upgrade preserves Suspend and frozen cooldown
+PASS Externally destroyed instance safely rejected
+PASS Real shots after mid-cycle upgrade: wait=0.324920s expected=0.324508s; next interval=0.650298s expected=0.65s
+RESULT: 20/20 passed; failures=0

@@ -46,6 +46,15 @@ public class BuildInputController : MonoBehaviour
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(pointerId))
             return;
 
+        // Query at the new pointer position too: InputSystemUIInputModule may update after this script.
+        if (EventSystem.current != null)
+        {
+            var pointer = new PointerEventData(EventSystem.current) { position = screenPos };
+            var hits = new System.Collections.Generic.List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer, hits);
+            if (hits.Count > 0) return;
+        }
+
         if (ExternalPointerBlocker != null && ExternalPointerBlocker(screenPos))
             return;
 

@@ -1,0 +1,1 @@
+PASS UI double click at same screen position: gold=140, level=1, towers=1, secondHit=BuildMenu. Buy and Upgrade do not overlap.

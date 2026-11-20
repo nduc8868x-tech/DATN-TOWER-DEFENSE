@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1600c35196e192a4c91ad0f551301ec5, type: 3}
+  m_Name: TowerCatalog_ThapMagic
+  m_EditorClassIdentifier: Assembly-CSharp::TowerCatalog
+  entries:
+  - {fileID: 11400000, guid: 4cc3791f88d668745a63ccf31a652b7b, type: 2}
+  - {fileID: 11400000, guid: 72325602c715627449db3e9b72a0d409, type: 2}
+  - {fileID: 11400000, guid: 7d2325b77870be643828576f9b71aa96, type: 2}

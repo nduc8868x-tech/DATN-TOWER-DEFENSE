@@ -101,7 +101,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
                 if (level == 2) { damage = 28; interval = 0.65f; return true; }
                 return false;
 
-            case "stone":
+            case "rock":
                 if (level == 1) { damage = 30; interval = 2.0f; radius = 1.0f; return true; }
                 if (level == 2) { damage = 50; interval = 1.8f; radius = 1.25f; return true; }
                 return false;
@@ -128,6 +128,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
         private int damage;
         private float interval;
         private float radius;
+        public override bool IsValid => !isDisposed && visual != null;
 
         public FakeTowerHandle(
             FakeTowerFactory owner,
@@ -157,27 +158,29 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
             return new TowerSnapshot(towerId, level, 2, isActive, isDisposed, damage, interval, radius);
         }
 
-        public override void Activate()
+        public override bool Activate()
         {
             if (isDisposed)
-                return;
+                return false;
 
             isActive = true;
             RefreshVisual();
+            return true;
         }
 
-        public override void Suspend()
+        public override bool Suspend()
         {
             if (isDisposed)
-                return;
+                return false;
 
             isActive = false;
             RefreshVisual();
+            return true;
         }
 
         public override bool TryApplyLevel(int targetLevel)
         {
-            if (isDisposed)
+            if (isDisposed || targetLevel != level + 1)
                 return false;
 
             if (owner != null && owner.ShouldFailUpgrade())
@@ -225,7 +228,7 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
                     spriteRenderer.color = Color.gray;
                 else if (towerId == "arrow" || towerId == "archer")
                     spriteRenderer.color = new Color(0.2f, 0.85f, 0.35f);
-                else if (towerId == "stone")
+                else if (towerId == "rock")
                     spriteRenderer.color = new Color(0.85f, 0.55f, 0.2f);
                 else
                     spriteRenderer.color = new Color(0.3f, 0.6f, 1.0f);
@@ -233,3 +236,4 @@ public class FakeTowerFactory : MonoBehaviour, ITowerFactory
         }
     }
 }
+

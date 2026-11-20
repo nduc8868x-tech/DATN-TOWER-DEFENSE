@@ -23,4 +23,5 @@ public readonly struct EnemyHandle
 
     public float Progress =>
         IsAlive ? Target.Progress : 0f;
+    public float RemainingDistance => IsAlive ? Target.GetComponent<EnemyMovement>().RemainingDistance : float.PositiveInfinity;
 }

@@ -1,0 +1,144 @@
+# 1. DOANH TRẠI KIÊN CỐ – FORTIFIED BARRACKS
+
+## 1.1. Giới thiệu
+
+Doanh Trại Kiên Cố là công trình phòng thủ triệu hồi những binh sĩ được trang bị giáp và vũ khí cận chiến.
+
+Các binh sĩ có lượng máu cao, khả năng chịu sát thương tốt và được triển khai tại điểm tập kết để ngăn chặn quân địch.
+
+**Vai trò:** Chống chịu (Tank), chặn quái giáp và bảo vệ các vị trí chiến lược.
+
+## 1.2. Bảng thông số đề xuất
+
+| Thuộc tính | Cấp 1 | Cấp 2 |
+|---|---:|---:|
+| Giá mua tháp | 175 vàng | — |
+| Giá nâng cấp | — | 205 vàng |
+| Số lính tối đa | 2 | 2 |
+| HP mỗi lính | 160 | 240 |
+| Sát thương mỗi lính | 10 | 18 |
+| Thời gian giữa các đòn | 1,25 giây | 1,1 giây |
+| DPS mỗi lính | 8 | 16,36 |
+| Giáp của lính | 10% | 20% |
+| Số quái chặn tối đa | 2 | 2 |
+| Thời gian hồi sinh | 16 giây | 13 giây |
+| Phạm vi tập kết | 1,3 đơn vị | 1,5 đơn vị |
+| Tổng vốn đầu tư | 175 vàng | 380 vàng |
+| Giá bán (70%) | 122 vàng | 266 vàng |
+
+*Các thông số là đề xuất mới, chưa được kiểm nghiệm trong Unity.*
+
+## 1.3. Cơ chế cấp 1
+
+Khi xây dựng, doanh trại triệu hồi 2 binh sĩ giáp nhẹ.
+
+Mỗi binh sĩ có:
+
+- 160 HP.
+- 10 sát thương cận chiến.
+- 10% giảm sát thương nhận vào.
+- Tấn công mỗi 1,25 giây.
+- Chặn tối đa 1 quái.
+- Hồi sinh sau 16 giây khi bị tiêu diệt.
+
+**Ví dụ:** Khi 3 quái Normal đi tới, hai lính có thể chặn 2 quái. Quái còn lại tiếp tục di chuyển.
+
+## 1.4. Cơ chế cấp 2
+
+Khi nâng cấp, doanh trại thay đổi ngoại hình sang công trình kiên cố hơn, có lối vào bằng đá.
+
+Hai lính được tăng:
+
+- HP từ 160 lên 240.
+- Sát thương từ 10 lên 18.
+- Giáp từ 10% lên 20%.
+- Tốc độ đánh từ 1,25 xuống 1,1 giây.
+- Thời gian hồi sinh từ 16 xuống 13 giây.
+
+Số lượng lính vẫn giữ nguyên là 2.
+
+Điều này giúp phân biệt doanh trại kiên cố với doanh trại thường: doanh trại kiên cố có ít lính nhưng mỗi lính khỏe hơn.
+
+## 1.5. Cơ chế chống chịu
+
+Khi quái tấn công lính:
+
+**Sát thương nhận = Sát thương gốc × (1 − tỷ lệ giáp)**
+
+Ví dụ, một quái gây 30 sát thương:
+
+- Lính cấp 1 nhận 27 sát thương.
+- Lính cấp 2 nhận 24 sát thương.
+
+Giáp của lính và giáp của quái được tính độc lập.
+
+## 1.6. Cơ chế hồi sinh
+
+Mỗi doanh trại có 2 Soldier Slot.
+
+Khi một lính chết, slot tương ứng bắt đầu thời gian hồi sinh:
+
+- Cấp 1: 16 giây.
+- Cấp 2: 13 giây.
+
+Nếu cả hai lính chết cùng lúc, cả hai được hồi sinh sau thời gian tương ứng.
+
+Khi công trình bị bán, tất cả lính và bộ đếm hồi sinh phải được hủy.
+
+Khi trận đấu tạm dừng, thời gian hồi sinh cũng tạm dừng.
+
+## 1.7. Khả năng chặn boss
+
+Lính có thể tấn công boss bằng sát thương cận chiến.
+
+Tuy nhiên, boss không bị chặn đứng hoàn toàn. Boss có thể tiếp tục di chuyển qua khu vực tập kết và phản công lính.
+
+Cơ chế này giúp tránh trường hợp nhiều tháp Lính giữ boss đứng yên vô hạn.
+
+## 1.8. Chi phí nâng cấp và bán tháp
+
+**Cấp 1:**
+
+Giá mua: 175 vàng.
+
+Giá bán = floor(175 × 70%) = 122 vàng.
+
+**Cấp 2:**
+
+Giá nâng: 205 vàng.
+
+Tổng đầu tư: 175 + 205 = 380 vàng.
+
+Giá bán = floor(380 × 70%) = 266 vàng.
+
+Một công trình chỉ được nâng cấp một lần, từ cấp 1 lên cấp 2.
+
+## 1.9. Điểm mạnh
+
+- Máu lính cao.
+- Có giáp giảm sát thương.
+- Chống chịu tốt trước quái mạnh.
+- Tạo khoảng thời gian an toàn cho các tháp tấn công.
+- Phù hợp làm tuyến phòng thủ cuối cùng.
+
+## 1.10. Điểm yếu
+
+- Chỉ có tối đa 2 lính.
+- Thời gian hồi sinh dài.
+- Giá nâng cấp cao.
+- Không hiệu quả khi số quái vượt quá khả năng chặn.
+- Không thể khóa đường đi của boss.
+
+## 1.11. Vị trí đề xuất
+
+Doanh Trại Kiên Cố phù hợp ở khu vực cuối đường, nơi cần giữ quái lâu nhất trước khi chúng thoát.
+
+Trong bản đồ BG2 – Rừng Nấm Pha Lê, có thể lựa chọn thay Doanh Trại Thường tại P4 bằng Doanh Trại Kiên Cố.
+
+Đây là lựa chọn thay thế, không tạo thêm vị trí xây mới.
+
+## 1.12. Kết luận
+
+Doanh Trại Kiên Cố là công trình hỗ trợ thiên về chống chịu, phù hợp với chiến thuật phòng thủ ở các đoạn đường quan trọng.
+
+Sự khác biệt giữa số lượng lính và sức mạnh mỗi lính tạo ra hai lựa chọn chiến thuật rõ ràng cho người chơi.

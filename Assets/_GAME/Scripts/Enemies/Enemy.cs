@@ -25,6 +25,8 @@ public class Enemy : MonoBehaviour
     public EnemyState State => state;
     public bool IsAlive => state == EnemyState.Alive;
 
+    public event System.Action<Enemy> Resolved;
+
     public float Progress => movement != null ? movement.Progress : 0f; 
 
     private CombatResolver combatResolver;
@@ -65,10 +67,18 @@ internal void ApplyResolvedEscape()
     state = EnemyState.Escaped;
     RemoveFromRegistry();
 
-    movement?.StopMovement();
+    if (movement != null)
+        movement.StopMovement();
 
-    Debug.Log($"{name}: Đã tới đích, chuyển sang Escaped.", this);
-    gameObject.SetActive(false);
+    Debug.Log(
+        $"{name}: Đã tới đích, chuyển sang Escaped.",
+        this
+    );
+
+    Resolved?.Invoke(this);
+
+    if (this != null)
+        gameObject.SetActive(false);
 }
 
     private void Awake()
@@ -122,6 +132,8 @@ internal void ApplyResolvedEscape()
             Debug.LogWarning($"{name}: Chưa gán Animator.", this);
 
         Debug.Log($"{name}: Đã chuyển sang trạng thái Dead.", this);
+
+        Resolved?.Invoke(this);
     }
 
     private void HandleReachedEnd(EnemyMovement source)

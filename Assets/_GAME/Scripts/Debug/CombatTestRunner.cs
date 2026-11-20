@@ -29,11 +29,6 @@ public class CombatTestRunner : MonoBehaviour
             resolver.RegisterEnemy(enemy);
     }
 
-    private void LateUpdate()
-    {
-        resolver.ResolvePendingBatch();
-    }
-
     [ContextMenu("Debug/Escape Then Hit 16")]
     private void EscapeThenHit()
     {

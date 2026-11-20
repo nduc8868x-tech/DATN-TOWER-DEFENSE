@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(10000)]
 public class CombatResolver : MonoBehaviour
 {
     private readonly Queue<HitRequest> hits = new Queue<HitRequest>();
@@ -11,14 +12,46 @@ public class CombatResolver : MonoBehaviour
 
     private static int nextSessionId;
     private int sessionId;
+    public int SessionId => sessionId;
     private int nextSpawnId;
     private int lastResolvedFrame = -1;
+    private readonly HashSet<Projectile> projectiles = new HashSet<Projectile>();
+    private readonly HashSet<RockImpactEffect> rockImpacts = new HashSet<RockImpactEffect>();
+    internal void RegisterRockImpact(RockImpactEffect effect) => rockImpacts.Add(effect);
+    internal void UnregisterRockImpact(RockImpactEffect effect) => rockImpacts.Remove(effect);
+    public int ProjectileCount => projectiles.Count;
+    public void RegisterProjectile(Projectile projectile) => projectiles.Add(projectile);
+    public void UnregisterProjectile(Projectile projectile) => projectiles.Remove(projectile);
+    public void CleanupProjectiles(int session)
+    {
+        foreach (var projectile in new List<Projectile>(projectiles))
+            if (projectile != null && projectile.SessionId == session) projectile.Cancel();
+
+        foreach (var effect in new List<RockImpactEffect>(rockImpacts))
+            if (effect != null && effect.SessionId == session) effect.Cancel();
+    }
+    private void OnDestroy() => CleanupProjectiles(sessionId);
+
+    public void InvalidateSession()
+    {
+        sessionId = 0;
+        hits.Clear(); escapes.Clear(); Registry.ClearSession();
+    }
 
     public void BeginSession()
     {
+        CleanupProjectiles(sessionId);
         sessionId = ++nextSessionId;
         nextSpawnId = 0;
+        hits.Clear();
+        escapes.Clear();
+        lastResolvedFrame = -1;
         Registry.ClearSession();
+    }
+
+    private void LateUpdate()
+    {
+        ResolvePendingBatch();
     }
 
     public void RegisterEnemy(Enemy enemy)
@@ -47,7 +80,7 @@ public class CombatResolver : MonoBehaviour
 
     public void ResolvePendingBatch()
     {
-        if (sessionId == 0 || lastResolvedFrame == Time.frameCount)
+        if (Time.timeScale <= 0f || sessionId == 0 || lastResolvedFrame == Time.frameCount)
             return;
 
         lastResolvedFrame = Time.frameCount;
