@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [DisallowMultipleComponent, DefaultExecutionOrder(11000)]
 public class FlowBootstrapper : MonoBehaviour
@@ -43,6 +43,7 @@ public class FlowBootstrapper : MonoBehaviour
         restarting = true;
         try
         {
+            GuiRunRules.Capture();
             int old = gameSession.SessionId;
             gameSession.Invalidate();
             if (combatResolver) combatResolver.InvalidateSession();

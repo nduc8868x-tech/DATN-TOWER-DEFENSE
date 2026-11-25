@@ -36,7 +36,7 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
-    public void Initialize(EnemyData enemyData)
+    public void Initialize(EnemyData enemyData, float healthMultiplier = 1f)
     {
         if (enemyData == null)
         {
@@ -45,7 +45,7 @@ public class EnemyHealth : MonoBehaviour
         }
 
         data = enemyData;
-        maxHP = Mathf.Max(1, data.maxHP);
+        maxHP = Mathf.Max(1, Mathf.RoundToInt(data.maxHP * healthMultiplier));
         armor = Mathf.Clamp01(data.armor);
 
         ResetHealth();

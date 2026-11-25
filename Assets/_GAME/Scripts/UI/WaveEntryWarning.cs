@@ -46,7 +46,7 @@ public sealed class WaveEntryWarning : MonoBehaviour
         callEarly.interactable = interactable;
         skull.localScale = Vector3.one;
         if (progressRing != null) progressRing.Progress = waves.CountdownProgress;
-        countdown.text = Mathf.CeilToInt(waves.CountdownRemaining) + "s";
+        if (countdown != null) countdown.text = Mathf.CeilToInt(waves.CountdownRemaining) + "s";
         var direction = entry - position;
         if (direction.sqrMagnitude < .01f) direction = Vector2.down;
         direction.Normalize();

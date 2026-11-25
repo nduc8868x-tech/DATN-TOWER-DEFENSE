@@ -594,6 +594,7 @@ public sealed class LevelHUD : MonoBehaviour
 
     private void RefreshResult(SessionSnapshot snapshot)
     {
+        if (GetComponent<GameGuiCoordinator>() != null) return;
         bool victory = snapshot.State == GameState.Victory;
         bool defeat = snapshot.State == GameState.Defeat;
 

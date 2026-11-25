@@ -47,6 +47,6 @@ public sealed class RegistrationCloseTransition : MonoBehaviour
             yield return null;
         }
 
-        SceneManager.LoadSceneAsync(MainMenuScene);
+        GuiNavigation.Go(MainMenuScene);
     }
 }

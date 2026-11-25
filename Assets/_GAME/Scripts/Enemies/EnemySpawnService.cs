@@ -119,7 +119,7 @@ private readonly struct SpawnInfo
 
         // Mỗi lần thử hiện tại tạo một instance mới.
         // Awake của Enemy khởi tạo Alive và Animator bắt đầu từ mặc định.
-        health.Initialize(data);
+        health.Initialize(data, GuiRunRules.EnemyHealthMultiplier);
 
         if (!movement.Initialize(path, data.speed))
         {

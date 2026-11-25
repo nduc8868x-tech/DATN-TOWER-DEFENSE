@@ -15,8 +15,14 @@ public sealed class MenuIconToggle : MonoBehaviour
         onIcon = icon.sprite;
     }
 
+    private void OnEnable(){PlayerProgress.Changed+=Refresh;}
+    private void Start(){GuiAudio.Ensure();Refresh();}
+    private void OnDisable(){PlayerProgress.Changed-=Refresh;}
+    private void Refresh(){if(icon==null)return;bool on=name=="Music"?PlayerProgress.Data.music>0:PlayerProgress.Data.sound>0;icon.sprite=on?onIcon:offIcon;}
     public void ToggleIcon()
     {
-        icon.sprite = icon.sprite == onIcon ? offIcon : onIcon;
+        if(name=="Music")PlayerProgress.Data.music=PlayerProgress.Data.music>0?0:.6f;
+        else PlayerProgress.Data.sound=PlayerProgress.Data.sound>0?0:.8f;
+        PlayerProgress.Store();GuiAudio.Click();
     }
 }
