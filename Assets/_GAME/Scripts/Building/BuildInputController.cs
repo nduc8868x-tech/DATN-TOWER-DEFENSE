@@ -77,7 +77,24 @@ public class BuildInputController : MonoBehaviour
         if (hit != null && hit.TryGetComponent<BuildPoint>(out BuildPoint point))
             SelectPoint(point);
         else
-            ClearSelection();
+        {
+            BuildPoint visibleTower = null;
+            float nearest = float.MaxValue;
+            foreach (var candidate in FindObjectsByType<BuildPoint>(FindObjectsSortMode.None))
+            {
+                if (!candidate.IsOccupied || candidate.CurrentTowerHandle.Instance == null) continue;
+                foreach (var renderer in candidate.CurrentTowerHandle.Instance.GetComponentsInChildren<SpriteRenderer>())
+                {
+                    var bounds = renderer.bounds;
+                    if (!renderer.enabled || !renderer.gameObject.activeInHierarchy || worldPos.x < bounds.min.x ||
+                        worldPos.x > bounds.max.x || worldPos.y < bounds.min.y || worldPos.y > bounds.max.y) continue;
+                    float distance = ((Vector2)(worldPos - candidate.AnchorPosition)).sqrMagnitude;
+                    if (distance < nearest) { nearest = distance; visibleTower = candidate; }
+                }
+            }
+            if (visibleTower != null) SelectPoint(visibleTower);
+            else ClearSelection();
+        }
     }
 
     public void SelectPoint(BuildPoint point)

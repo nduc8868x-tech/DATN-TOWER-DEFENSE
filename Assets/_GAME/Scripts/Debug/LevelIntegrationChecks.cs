@@ -202,7 +202,7 @@ public sealed class LevelIntegrationChecks : MonoBehaviour
         Check(All<GameSession>().Length==1 && All<EconomyManager>().Length==1 && All<CombatResolver>().Length==1 && All<WaveManager>().Length==1 &&
             All<UnityEngine.EventSystems.EventSystem>().Length==1,"One manager set, one resolver runner, one EventSystem");
         var hud=UnityEngine.Object.FindFirstObjectByType<LevelHUD>();
-        Check(hud.status.text.Contains("240") && hud.status.text.Contains("20") && hud.startWave.interactable && !hud.resultPanel.activeSelf,"HUD initial snapshot and controls after restart");
+        Check(gold.CurrentGold==240 && session.Lives==20 && waves.CanCallNextWaveEarly && !hud.resultPanel.activeSelf,"HUD initial snapshot and controls after restart");
         results.Add($"TOTAL: {results.Count(s=>s.StartsWith("PASS "))} passed, {failed} failed");
         Finished=true;
 #if UNITY_EDITOR

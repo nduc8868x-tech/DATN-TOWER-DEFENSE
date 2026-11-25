@@ -51,7 +51,6 @@ public class FlowBootstrapper : MonoBehaviour
             GetComponent<BuildManager>()?.ClearAllTowers();
             if (old > 0) enemySpawnService.CleanupSession(old);
             if (combatResolver) combatResolver.BeginSession();
-            Time.timeScale = 1f;
             gameSession.Initialize(startingLives, startingGold, waveManager ? waveManager.TotalWaves : totalWaves,
                 combatResolver ? combatResolver.SessionId : 0);
             if (enemySpawnService is FakeEnemySpawnService fake) fake.SetActiveSessionId(gameSession.SessionId);
@@ -67,6 +66,5 @@ public class FlowBootstrapper : MonoBehaviour
         gameSession.Invalidate(); waveManager?.CancelSchedule();
         GetComponent<BuildManager>()?.ClearAllTowers();
         if (old > 0) enemySpawnService?.CleanupSession(old);
-        Time.timeScale = 1f;
     }
 }

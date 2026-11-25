@@ -113,6 +113,7 @@ public class Tower : MonoBehaviour
         body.sprite = next.bodySprite;
         if (rockLift != null) rockLift.ApplyLevelVisuals(next);
         targeting.Reset();
+        TowerUpgradeEffect.Play(this);
         error = string.Empty;
         return true;
     }

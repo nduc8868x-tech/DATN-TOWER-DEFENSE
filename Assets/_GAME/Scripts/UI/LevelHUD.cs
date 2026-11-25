@@ -24,8 +24,10 @@ public sealed class LevelHUD : MonoBehaviour
     public Text resultTitle;
 
     [Header("Control Buttons")]
-    public Button startWave;
     public Button pause;
+    public Button speed;
+    [SerializeField] private Text speedText;
+    [SerializeField] private TMP_Text speedTMPText;
     public Button restart;
 
     [Header("Build Buttons")]
@@ -79,11 +81,11 @@ public sealed class LevelHUD : MonoBehaviour
 
     private void OnEnable()
     {
-        if (startWave != null)
-            startWave.onClick.AddListener(StartWave);
-
         if (pause != null)
             pause.onClick.AddListener(TogglePause);
+
+        if (speed != null)
+            speed.onClick.AddListener(ToggleSpeed);
 
         if (restart != null)
             restart.onClick.AddListener(Restart);
@@ -108,11 +110,11 @@ public sealed class LevelHUD : MonoBehaviour
 
     private void OnDisable()
     {
-        if (startWave != null)
-            startWave.onClick.RemoveListener(StartWave);
-
         if (pause != null)
             pause.onClick.RemoveListener(TogglePause);
+
+        if (speed != null)
+            speed.onClick.RemoveListener(ToggleSpeed);
 
         if (restart != null)
             restart.onClick.RemoveListener(Restart);
@@ -197,13 +199,10 @@ public sealed class LevelHUD : MonoBehaviour
         eventsBound = false;
     }
 
-    private void StartWave()
+    private void ToggleSpeed()
     {
-        if (flow == null || flow.Session == null || waves == null)
-            return;
-
-        if (flow.Session.CanStartWave)
-            waves.StartNextWave();
+        if (flow != null && flow.Session != null)
+            flow.Session.ToggleSpeed();
     }
 
     private void TogglePause()
@@ -370,7 +369,7 @@ public sealed class LevelHUD : MonoBehaviour
             else
             {
                 SetMessage(
-                    "Sẵn sàng — bấm bắt đầu cho đợt tiếp theo."
+                    "Đợt tiếp theo sẽ tự bắt đầu sau thời gian chuẩn bị."
                 );
             }
         }
@@ -431,16 +430,12 @@ public sealed class LevelHUD : MonoBehaviour
 
     private void RefreshControls(SessionSnapshot snapshot)
     {
-        if (startWave != null)
-        {
-            startWave.interactable = flow.Session.CanStartWave;
+        if (speed != null)
+            speed.interactable = flow.Session.CanChangeSpeed;
 
-            bool nextWave =
-                snapshot.State == GameState.Preparing &&
-                waves.SpawnFinished;
-
-            Label(startWave, nextWave ? "Next Wave" : "Start Wave");
-        }
+        string speedLabel = snapshot.SelectedSpeed == 2 ? "2×" : "1×";
+        if (speedText != null) speedText.text = speedLabel;
+        if (speedTMPText != null) speedTMPText.text = speedLabel;
 
         if (pause != null)
         {

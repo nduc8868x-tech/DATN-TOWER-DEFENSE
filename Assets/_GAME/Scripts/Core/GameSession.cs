@@ -18,6 +18,8 @@ public class GameSession : MonoBehaviour
     [SerializeField] private int totalWaves = 10;
     [SerializeField] private int aliveEnemies = 0;
 
+    [SerializeField, Range(1, 2)] private int selectedSpeed = 1;
+
     private readonly Queue<EnemyResolved> resolvedQueue = new Queue<EnemyResolved>();
     private readonly HashSet<int> processedSpawnIds = new HashSet<int>();
     private readonly Dictionary<EnemyIdentity, int> registered = new Dictionary<EnemyIdentity, int>();
@@ -30,6 +32,8 @@ public class GameSession : MonoBehaviour
     public int CurrentWave => currentWave;
     public int TotalWaves => totalWaves;
     public int AliveEnemies => aliveEnemies;
+    public int SelectedSpeed => selectedSpeed;
+    public bool CanChangeSpeed => BuildAllowed;
     public int WaveKills { get; private set; }
     public int WaveLeaks { get; private set; }
 
@@ -52,7 +56,7 @@ public class GameSession : MonoBehaviour
 
     public void Initialize(int startingLives = 20, int startingGold = 240, int maxWaves = 10, int combatSessionId = 0)
     {
-        Time.timeScale = 1f;
+        selectedSpeed = 1;
         sessionId = combatSessionId > 0 ? combatSessionId : ++nextSessionId;
         accepting = true;
         registered.Clear();
@@ -94,13 +98,25 @@ public class GameSession : MonoBehaviour
         return true;
     }
 
+    public bool TrySetSpeed(int speed)
+    {
+        if (!CanChangeSpeed || (speed != 1 && speed != 2) || speed == selectedSpeed)
+            return false;
+
+        selectedSpeed = speed;
+        ApplyTimeScale();
+        NotifySnapshot();
+        return true;
+    }
+
+    public bool ToggleSpeed() => TrySetSpeed(selectedSpeed == 1 ? 2 : 1);
+
     public bool Pause()
     {
         if (!accepting || (state != GameState.Preparing && state != GameState.Running))
             return false;
 
         stateBeforePause = state;
-        Time.timeScale = 0f;
         SetState(GameState.Paused);
         return true;
     }
@@ -110,7 +126,6 @@ public class GameSession : MonoBehaviour
         if (!accepting || state != GameState.Paused)
             return false;
 
-        Time.timeScale = 1f;
         SetState(stateBeforePause);
         return true;
     }
@@ -136,9 +151,15 @@ public class GameSession : MonoBehaviour
     private void SetState(GameState newState)
     {
         state = newState;
-        if (state == GameState.Victory || state == GameState.Defeat) Time.timeScale = 0f;
+        ApplyTimeScale();
         StateChanged?.Invoke(state);
         NotifySnapshot();
+    }
+
+    private void ApplyTimeScale()
+    {
+        Time.timeScale = state == GameState.Paused || state == GameState.Victory || state == GameState.Defeat
+            ? 0f : selectedSpeed;
     }
 
     public void SetWave(int waveIndex, int waveTotal)
@@ -245,7 +266,7 @@ public class GameSession : MonoBehaviour
     public SessionSnapshot GetSnapshot()
     {
         int gold = economyManager != null ? economyManager.CurrentGold : 0;
-        return new SessionSnapshot(state, gold, lives, currentWave, totalWaves, aliveEnemies);
+        return new SessionSnapshot(state, gold, lives, currentWave, totalWaves, aliveEnemies, selectedSpeed);
     }
 
     private void HandleGoldChanged(int _)

@@ -6,8 +6,9 @@ public readonly struct SessionSnapshot
     public int CurrentWave { get; }
     public int TotalWaves { get; }
     public int AliveEnemies { get; }
+    public int SelectedSpeed { get; }
 
-    public SessionSnapshot(GameState state, int gold, int lives, int currentWave, int totalWaves, int aliveEnemies)
+    public SessionSnapshot(GameState state, int gold, int lives, int currentWave, int totalWaves, int aliveEnemies, int selectedSpeed = 1)
     {
         State = state;
         Gold = gold;
@@ -15,5 +16,6 @@ public readonly struct SessionSnapshot
         CurrentWave = currentWave;
         TotalWaves = totalWaves;
         AliveEnemies = aliveEnemies;
+        SelectedSpeed = selectedSpeed;
     }
 }

@@ -17,6 +17,8 @@ public class Enemy : MonoBehaviour
     [Header("Runtime")]
     [SerializeField] private EnemyState state = EnemyState.Alive;
 
+    [SerializeField, Min(0f)] private float corpseHoldTime = .35f;
+    [SerializeField, Min(.1f)] private float corpseFadeTime = .4f;
     private EnemyHealth health;
 
     private static readonly int DieTrigger =
@@ -134,6 +136,35 @@ internal void ApplyResolvedEscape()
         Debug.Log($"{name}: Đã chuyển sang trạng thái Dead.", this);
 
         Resolved?.Invoke(this);
+        StartCoroutine(RetireCorpse());
+    }
+
+
+    private System.Collections.IEnumerator RetireCorpse()
+    {
+        float deathDuration = 1.7f;
+        if (animator != null && animator.runtimeAnimatorController != null)
+            foreach (var clip in animator.runtimeAnimatorController.animationClips)
+                if (clip.name.ToLowerInvariant().Contains("die") || clip.name.ToLowerInvariant().Contains("death"))
+                    deathDuration = Mathf.Max(deathDuration, clip.length / Mathf.Max(.01f, Mathf.Abs(animator.speed)));
+        yield return new WaitForSeconds(deathDuration + corpseHoldTime);
+        var renderers = GetComponentsInChildren<SpriteRenderer>();
+        var colors = new Color[renderers.Length];
+        for (int i = 0; i < colors.Length; i++) colors[i] = renderers[i].color;
+        float elapsed = 0;
+        while (elapsed < corpseFadeTime)
+        {
+            elapsed += Time.deltaTime;
+            for (int i = 0; i < renderers.Length; i++)
+                if (renderers[i] != null)
+                {
+                    var color = colors[i]; color.a *= 1 - Mathf.Clamp01(elapsed / corpseFadeTime);
+                    renderers[i].color = color;
+                }
+            yield return null;
+        }
+        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
     private void HandleReachedEnd(EnemyMovement source)

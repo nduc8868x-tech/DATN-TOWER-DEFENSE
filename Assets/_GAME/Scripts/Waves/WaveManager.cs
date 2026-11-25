@@ -8,6 +8,17 @@ public sealed class WaveManager : MonoBehaviour
     [SerializeField] private SplineContainer path;
     [SerializeField] private RouteBinding[] routes;
     [System.Serializable] public sealed class RouteBinding { public string routeId; public SplineContainer container; }
+    [Header("Automatic wave preparation (scaled seconds)")]
+    [SerializeField, Min(.1f)] private float initialPreparation = 12f;
+    [SerializeField, Min(.1f)] private float interWavePreparation = 8f;
+    public bool CountdownActive { get; private set; }
+    public float CountdownRemaining { get; private set; }
+    public float CountdownDuration { get; private set; }
+    public float CountdownProgress => CountdownDuration > 0 ? 1 - Mathf.Clamp01(CountdownRemaining / CountdownDuration) : 0;
+    private readonly System.Collections.Generic.List<SplineContainer> incomingRoutes = new System.Collections.Generic.List<SplineContainer>();
+    public System.Collections.Generic.IReadOnlyList<SplineContainer> IncomingRoutes => incomingRoutes;
+    public bool CanCallNextWaveEarly => CountdownActive && session && session.SessionId == sessionId && session.CanStartWave;
+    public bool TryCallNextWaveEarly() => CanCallNextWaveEarly && StartNextWave();
     private WaveGroup[] groups;
     private int groupIndex, groupSpawned;
     public int CompletedWaves { get; private set; }
@@ -33,7 +44,20 @@ public sealed class WaveManager : MonoBehaviour
         CancelSchedule(); flow = owner; session = owner.Session; sessionId = session.SessionId;
         waveIndex = -1; CompletedWaves = 0; Spawned = 0; SpawnFinished = false; rewarded = false; LastError = "";
         session.BatchDrained += EvaluateCompletion; session.StateChanged += StateChanged;
+        BeginPreparation(initialPreparation);
         Changed?.Invoke();
+    }
+    private void BeginPreparation(float duration)
+    {
+        CountdownActive = waveIndex + 1 < TotalWaves;
+        CountdownRemaining = CountdownDuration = Mathf.Max(.1f, duration);
+        incomingRoutes.Clear();
+        if (!CountdownActive || waves[waveIndex + 1] == null) return;
+        foreach (var group in waves[waveIndex + 1].GetGroups())
+        {
+            var route = Route(group.routeId);
+            if (route != null && !incomingRoutes.Contains(route)) incomingRoutes.Add(route);
+        }
     }
     public bool StartNextWave()
     {
@@ -42,6 +66,7 @@ public sealed class WaveManager : MonoBehaviour
         if (!next || !next.IsValid) { Fail("Invalid wave data."); return false; }
         groups = next.GetGroups();
         foreach (var group in groups) if (!Route(group.routeId)) { Fail("Missing single-spline route: " + group.routeId); return false; }
+        CountdownActive = false; CountdownRemaining = CountdownDuration = 0; incomingRoutes.Clear();
         waveIndex++; Spawned = 0; failures = 0; SpawnFinished = false; rewarded = false;
         groupIndex = groupSpawned = 0;
         remaining = groups[0].delayBeforeGroup; scheduled = true;
@@ -52,6 +77,11 @@ public sealed class WaveManager : MonoBehaviour
     }
     private void Update()
     {
+        if (CountdownActive && session && session.SessionId == sessionId && session.CanStartWave)
+        {
+            CountdownRemaining = Mathf.Max(0, CountdownRemaining - Time.deltaTime);
+            if (CountdownRemaining <= 0) StartNextWave();
+        }
         if (!scheduled || !session || !session.CanSimulate || session.SessionId != sessionId || Time.deltaTime <= 0) return;
         remaining -= Time.deltaTime;
         if (remaining > 0) return;
@@ -85,7 +115,11 @@ public sealed class WaveManager : MonoBehaviour
         rewarded = true; CompletedWaves = waveIndex + 1; flow.Economy.AddGold(20);
         Debug.Log($"LEVEL01 WAVE {CompletedWaves}: gold={flow.Economy.CurrentGold}, lives={session.Lives}, spawned={Spawned}, killed={session.WaveKills}, leaked={session.WaveLeaks}", this);
         if (waveIndex == TotalWaves - 1) session.MarkVictory();
-        else session.TrySetState(GameState.Preparing);
+        else
+        {
+            session.TrySetState(GameState.Preparing);
+            BeginPreparation(interWavePreparation);
+        }
         Changed?.Invoke();
     }
     private void Fail(string reason)
@@ -96,9 +130,9 @@ public sealed class WaveManager : MonoBehaviour
     }
     private void StateChanged(GameState state)
     {
-        if (state == GameState.Defeat || state == GameState.Victory) scheduled = false;
+        if (state == GameState.Defeat || state == GameState.Victory) CancelSchedule();
     }
-    public void CancelSchedule() { scheduled = false; remaining = 0; }
+    public void CancelSchedule() { scheduled = false; remaining = 0; CountdownActive = false; CountdownRemaining = CountdownDuration = 0; incomingRoutes.Clear(); }
     private void OnDestroy()
     {
         if (session) { session.BatchDrained -= EvaluateCompletion; session.StateChanged -= StateChanged; }
